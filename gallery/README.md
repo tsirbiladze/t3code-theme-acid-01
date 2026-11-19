@@ -3,6 +3,8 @@
 [t3themes.com](https://t3themes.com) accepts at most 20,000 characters of theme CSS. The full dark theme uses about
 43,000, so this folder holds a core edition written to fit: 19,480 characters, dark only.
 
+![An open thread in the gallery edition](chat.png)
+
 It is the same theme to look at. In the eight views the full theme is checked against, the core edition matches
 its render on more than 99% of pixels. What it leaves out is small: the gauge's lime sector does not brighten
 toward the pointer, legends have no engraved shadow, some already-warm syntax colors keep the highlighter's own
