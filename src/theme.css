@@ -1,9 +1,13 @@
 /* ACID-01 · Carbon Instrument: a theme for T3 Code (https://github.com/pingdotgg/t3code).
    This file is the readable source. `node build.mjs` packs it, together with
    src/theme.meta.json, into acid-01.json, the file T3 Code installs.
-   Comments and whitespace are stripped on the way; nothing here loads a file. */
+   Comments and whitespace are stripped on the way; nothing here loads a file.
+   One stylesheet serves both appearances: every rule is shared, and what differs
+   between night and day is a token. Dark is the base (`:root`, the app puts .dark on
+   <html>); daylight redefines the tokens under `:root:not(.dark)`. */
 
-/* palette tokens: every color the CSS uses is named here once */
+/* palette tokens: every color the CSS uses is named here once per appearance.
+   CARBON, the dark base: a black faceplate around a recessed near-black screen. */
 :root {
   --ph-void: #060604;
   --ph-screen: #0b0b09;
@@ -38,6 +42,88 @@
   --ph-green-text: #84dd98;
   --ph-sand: #ddd5b4;
   --ph-sand-dim: #b2ab8f;
+  --ph-rust: #e88a6a;
+  --ph-rust-text: #f0a58a;
+  /* the signal drawn as a line (focus, caret, ticks, brackets, LED edges): at night,
+     the lamp colour itself */
+  --ph-signal-line: #c9fd36;
+  /* label tape (tooltips): bone tape, carbon ink */
+  --ph-tape: #e7e4d6;
+  --ph-tape-ink: #060604;
+  --ph-tape-mute: #3b3b34;
+  /* the app dims a running row to 70%, so its inks start one step brighter */
+  --ph-run-ink: #ddd5b4;
+  --ph-run-label: #dedccd;
+  --ph-run-icon: #cfcdbf;
+  /* shadow inks: wells and windows, lifted modules, the deck and dialogs, small parts,
+     pressed keys, and the shade the faceplate casts on the screen (top, side) */
+  --ph-recess: rgba(0, 0, 0, .9);
+  --ph-drop: rgba(0, 0, 0, .9);
+  --ph-drop-deep: rgba(0, 0, 0, .95);
+  --ph-drop-near: rgba(0, 0, 0, .7);
+  --ph-press: rgba(0, 0, 0, .5);
+  --ph-cast: rgba(0, 0, 0, .95);
+  --ph-cast-side: rgba(0, 0, 0, .8);
+}
+
+/* PUTTY AND PAPER, the daylight appearance: the same instrument with a bone-putty
+   faceplate around a matte paper display. Brightness follows the material, depth
+   follows the shadow: the screen, its windows and the input wells are paper (the
+   deepest wells the whitest), the faceplate is putty, the row under the cursor is
+   pressed into shade. Inks are black silkscreen. Lime stays a lamp (a fill with ink on
+   it); wherever the signal must be a line it takes the deep acid of --ph-signal-line. */
+:root:not(.dark) {
+  --ph-void: #fdfcf8;
+  --ph-screen: #f6f4ec;
+  --ph-screen2: #edeae1;
+  --ph-face-lo: #ebe8de;
+  --ph-face: #e1ddd0;
+  --ph-face2: #eae7dd;
+  --ph-face3: #d6d2c4;
+  --ph-active-row: #f7f5ee;
+  --ph-line-s: #dedbd0;
+  --ph-line-f: #c9c5b8;
+  --ph-line2: #b3afa2;
+  --ph-line3: #8f8b7f;
+  --ph-dim: #67645a;
+  --ph-mute: #4d4b42;
+  --ph-text: #24231d;
+  --ph-bright: #13120e;
+  --ph-signal: #c9fd36;
+  --ph-signal-hover: #dcff7a;
+  --ph-signal-deep: #7aa50a;
+  --ph-signal-ink: #0d1204;
+  --ph-signal-wash: #e3f4a6;
+  --ph-amber: #feb433;
+  --ph-amber-text: #6e3c00;
+  --ph-amber-ink: #261501;
+  --ph-amber-wash: #fbebc8;
+  --ph-red: #c8322c;
+  --ph-red-text: #8c1d17;
+  --ph-red-edge: #cf3a32;
+  --ph-red-wash: #f8e0db;
+  --ph-green: #2f8a4a;
+  --ph-green-text: #1a6832;
+  --ph-sand: #6c6136;
+  --ph-sand-dim: #a1987a;
+  --ph-rust: #ab4c31;
+  --ph-rust-text: #9c4129;
+  --ph-signal-line: #567c02;
+  /* in daylight the tape is the night instrument's carbon, with bone ink */
+  --ph-tape: #1e1e1a;
+  --ph-tape-ink: #e7e4d6;
+  --ph-tape-mute: #b5b3a6;
+  --ph-run-ink: #2c2712;
+  --ph-run-label: #2a2922;
+  --ph-run-icon: #4d4b42;
+  /* warm, soft shadows: putty and paper under daylight, never black smudges */
+  --ph-recess: rgba(64, 54, 24, .22);
+  --ph-drop: rgba(48, 40, 16, .26);
+  --ph-drop-deep: rgba(48, 40, 16, .32);
+  --ph-drop-near: rgba(48, 40, 16, .3);
+  --ph-press: rgba(64, 54, 24, .2);
+  --ph-cast: rgba(64, 54, 24, .16);
+  --ph-cast-side: rgba(64, 54, 24, .1);
 }
 
 /* ============================================================================
@@ -62,10 +148,15 @@
    Type: Inter for prose and titles; Adwaita Mono for data in its own case;
    mono capitals only for system legends. Small type is set in rem, so it
    follows the interface font size. Nothing is blue.
+   DAYLIGHT is the same build in putty and paper (see the palette above): the
+   faceplate becomes putty, the screen, readouts and wells paper; the lip is a lit
+   chamfer, the cut a shadow line; legends are letterpressed; the tape turns carbon;
+   hazard tape is amber on black, as it is on the street.
 
    1 tokens · 2 base · 3 shell · 4 sidebar · 5 header · 6 conversation ·
    7 composer · 8 overlays · 9 dialog · 10 settings · 11 terminal + details ·
-   12 primitives · 13 empty state · 14 motion   (15 syntax is generated)
+   12 primitives · 13 empty state · 14 motion · 15 daylight guards
+   (16 syntax is generated)
    ========================================================================== */
 
 /* ---------------------------------------------------------------- 1 tokens */
@@ -97,8 +188,18 @@
   /* engraved legends: a 1px shadow under mono capitals on the faceplate */
   --ph-engrave: 0 1px 0 rgba(0, 0, 0, .55);
 
-  /* glow budget: only 2px indicator LEDs may glow, and only this much */
-  --ph-led-glow: 0 0 4px 0 color-mix(in srgb, var(--ph-signal) 55%, transparent);
+  /* how a lit LED meets its panel. Glow budget: only 2px indicator LEDs may glow, and
+     only this much */
+  --ph-led-edge: 0 0 4px 0 color-mix(in srgb, var(--ph-signal) 55%, transparent);
+  /* the open thread's LED is painted into its well (see 4): the glow beside the bar */
+  --ph-bar-glow: color-mix(in srgb, var(--ph-signal) 38%, transparent);
+  /* selected text: a chartreuse tint over the text, never a solid slab */
+  --ph-selection: color-mix(in srgb, var(--ph-signal) 30%, transparent);
+  /* the room light dims behind a dialog */
+  --ph-veil: color-mix(in srgb, var(--ph-void) 72%, transparent);
+  /* a lit key at rest and pressed: lit top edge, dark skirt; on press they swap */
+  --ph-key-lit: inset 0 1px 0 0 rgba(255, 255, 255, .45), inset 0 -2px 0 0 rgba(0, 0, 0, .22), 0 1px 0 0 rgba(0, 0, 0, .6);
+  --ph-key-down: inset 0 1px 0 0 rgba(0, 0, 0, .3), inset 0 -1px 0 0 rgba(255, 255, 255, .2);
 
   /* caution: amber hazard stripes on carbon */
   --ph-hazard: repeating-linear-gradient(-45deg, var(--ph-amber) 0 3px, var(--ph-void) 3px 6px);
@@ -128,15 +229,48 @@
   --color-emerald-300: #9fe6ae; --color-emerald-400: #84dd98; --color-emerald-500: #4fc06e; --color-emerald-600: #3ba35a; --color-emerald-700: #2f8549;
 }
 
-/* App tokens the dark root re-declares at (0,2,0), restated one notch higher. info is the
+/* DAYLIGHT versions of the material tokens. The lip is a lit chamfer and the cut a shadow
+   line; legends are letterpressed (a highlight under them, not a shadow); an LED is a lit
+   tube seen in daylight, a deep-acid core (the line colour) inside a lime halo, because a
+   lime line alone vanishes on paper; the graticule and hazard tape print in black; the
+   selection is a lime highlighter. */
+:root:not(.dark) {
+  --ph-lip: rgba(255, 255, 255, .72);
+  --ph-cut: rgba(40, 34, 14, .3);
+  --ph-engrave: 0 1px 0 rgba(255, 255, 255, .8);
+  --ph-led-edge: 0 0 3px 1px color-mix(in srgb, var(--ph-signal) 85%, transparent);
+  --ph-bar-glow: color-mix(in srgb, var(--ph-signal) 85%, transparent);
+  --ph-selection: color-mix(in srgb, var(--ph-signal) 70%, transparent);
+  --ph-veil: color-mix(in srgb, var(--ph-tape) 40%, transparent);
+  --ph-key-lit: inset 0 1px 0 0 rgba(255, 255, 255, .6), inset 0 -2px 0 0 rgba(40, 60, 0, .2), 0 0 0 1px rgba(13, 18, 4, .82), 0 2px 0 0 rgba(13, 18, 4, .22);
+  --ph-key-down: inset 0 1px 0 0 rgba(40, 60, 0, .32), inset 0 -1px 0 0 rgba(255, 255, 255, .35), 0 0 0 1px rgba(13, 18, 4, .82);
+  --ph-hazard: repeating-linear-gradient(-45deg, var(--ph-amber) 0 3px, var(--ph-tape) 3px 6px);
+  --ph-grid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='1' height='1' fill='%2324231d' fill-opacity='.2'/%3E%3C/svg%3E");
+
+  /* the hard-coded Tailwind hues, folded the same way but inked dark for paper: the
+     shades light mode reads (400-700) */
+  --color-indigo-400: #a35c00; --color-indigo-500: #9a5600; --color-indigo-600: #8a4d00; --color-indigo-700: #7a4400;
+  --color-blue-400: #857850; --color-blue-500: #776b44; --color-blue-600: #6c6136; --color-blue-700: #5c522c;
+  --color-sky-400: #857850; --color-sky-500: #776b44; --color-sky-600: #6c6136; --color-sky-700: #5c522c;
+  --color-cyan-400: #857850; --color-cyan-500: #776b44; --color-cyan-600: #6c6136; --color-cyan-700: #5c522c;
+  --color-teal-400: #857850; --color-teal-500: #776b44; --color-teal-600: #6c6136; --color-teal-700: #5c522c;
+  --color-violet-400: #8c6a2a; --color-violet-500: #7f5f24; --color-violet-600: #6f531d; --color-violet-700: #614818;
+  --color-purple-400: #8c6a2a; --color-purple-500: #7f5f24; --color-purple-600: #6f531d; --color-purple-700: #614818;
+  --color-fuchsia-400: #b85a3e; --color-fuchsia-500: #ab4c31; --color-fuchsia-600: #9c4129; --color-fuchsia-700: #883723;
+  --color-emerald-400: #3a9656; --color-emerald-500: #2f8a4a; --color-emerald-600: #1f6a35; --color-emerald-700: #1a5f30;
+}
+
+/* App tokens the dark root re-declares at (0,2,0), restated one notch higher (both
+   appearances, so day and night resolve through the same palette tokens). info is the
    quiet "running" sand and success a calm green: neither competes with the two lamps. */
-html:root.dark {
+html:root.dark,
+html:root:not(.dark) {
   --info: var(--ph-sand);
   --info-foreground: var(--ph-sand);
   --success: var(--ph-green);
   --success-foreground: var(--ph-green-text);
-  --guest: #e88a6a;
-  --guest-foreground: #f0a58a;
+  --guest: var(--ph-rust);
+  --guest-foreground: var(--ph-rust-text);
   --app-scrollbar-thumb: var(--ph-line2);
   --app-scrollbar-thumb-hover: var(--ph-line3);
   --glass-blur: 0px;
@@ -171,11 +305,38 @@ body {
   --context-chip-doc-epub: #d6b46a;
   --context-chip-invalid: #ff9483;
 }
+/* ...and in daylight the same families, inked for paper (each at least 4.5:1 on it) */
+:root:not(.dark) body {
+  --context-chip-image: #6c6136;
+  --context-chip-video: #9c4129;
+  --context-chip-file: #6c6136;
+  --context-chip-mention: #24231d;
+  --context-chip-terminal: #6c6136;
+  --context-chip-element: #8a4d00;
+  --context-chip-preview-annotation: #8a4d00;
+  --context-chip-review-comment: #6f531d;
+  --context-chip-pull-request: #6c6136;
+  --context-chip-pr-open: #1a6832;
+  --context-chip-pr-draft: #4d4b42;
+  --context-chip-pr-merged: #6f531d;
+  --context-chip-pr-closed: #a3241d;
+  --context-chip-skill: #75591f;
+  --context-chip-model: #5c522c;
+  --context-chip-thread: #6c6136;
+  --context-chip-environment: #2a6a3d;
+  --context-chip-citation: #6c6136;
+  --context-chip-doc-pdf: #a3241d;
+  --context-chip-doc-word: #6c6136;
+  --context-chip-doc-spreadsheet: #1a6832;
+  --context-chip-doc-slides: #9c4129;
+  --context-chip-doc-epub: #6f531d;
+  --context-chip-invalid: #a3241d;
+}
 
 /* ---------------------------------------------------------------- 2 base */
-/* selection: a chartreuse tint over the text, never a solid slab */
-::selection { background-color: color-mix(in srgb, var(--ph-signal) 30%, transparent); }
-input, textarea, .composer-tiptap { caret-color: var(--ph-signal); }
+/* selection: a chartreuse tint at night, a lime highlighter by day */
+::selection { background-color: var(--ph-selection); }
+input, textarea, .composer-tiptap { caret-color: var(--ph-signal-line); }
 
 /* hairline icons with squared ends: drawn, not stamped */
 svg.lucide { stroke-width: 1.65; stroke-linecap: square; stroke-linejoin: miter; }
@@ -258,7 +419,11 @@ html[data-theme-id] [data-slot="sidebar"] [role="navigation"] { border-color: va
 [data-slot="sidebar-inner"] button:has(svg.lucide-download) span[aria-hidden="true"] {
   border-radius: 0;
   background-color: var(--ph-signal);
-  box-shadow: 0 0 0 2px var(--ph-face), var(--ph-led-glow);
+  box-shadow: 0 0 0 2px var(--ph-face), var(--ph-led-edge);
+}
+/* by day the dot's rim sits inside the faceplate gap, where the 2px gap would hide it */
+:root:not(.dark) [data-slot="sidebar-inner"] button:has(svg.lucide-download) span[aria-hidden="true"] {
+  box-shadow: 0 0 0 1px var(--ph-signal-line), 0 0 0 3px var(--ph-face);
 }
 
 /* the footer controls read as their own strip below a dotted rule (painted, no layout change) */
@@ -325,7 +490,8 @@ html[data-theme-id] [data-slot="sidebar"] [role="navigation"] { border-color: va
   color: var(--ph-amber-ink);
   stroke-width: 2.3;
 }
-/* failed: a red fault lamp, its own form: dark red body, red legend, 1px red rim */
+/* failed: a red fault lamp, its own form: an unlit body (dark red at night, pale red by day),
+   red legend, 1px red rim. Never lit like the amber lamp, so needs-you stays the loudest. */
 [data-thread-item] span:has(> svg:is(.lucide-circle-alert, .lucide-alert-circle)) {
   background-color: var(--ph-red-wash);
   color: var(--ph-red-text);
@@ -353,12 +519,12 @@ html[data-theme-id] [data-slot="sidebar"] [role="navigation"] { border-color: va
 }
 
 /* running / setting up: quiet. Sand ink, sentence case, no glow, no lamp; the app's own 70%
-   dim stays. Inks are set one step brighter than a quiet row so that after the dim they
-   still pass AA on the faceplate. */
+   dim stays. Inks are set one step stronger than a quiet row (brighter at night, darker by
+   day) so that after the dim they still pass AA on the faceplate. */
 [data-thread-item] span:has(> svg:is(.lucide-circle-dashed, .lucide-circle-dot-dashed)) { font-size: var(--ph-t-meta); font-weight: 400; }
-[data-thread-item] span:has(> svg.lucide-circle-dashed) { color: var(--ph-sand); }
+[data-thread-item] span:has(> svg.lucide-circle-dashed) { color: var(--ph-run-ink); }
 [data-thread-item] span:has(> svg.lucide-circle-dot-dashed) { color: var(--ph-mute); }
-[data-thread-item] > [role="button"]:has(svg.lucide-circle-dashed) { --contrast-secondary-label: #dedccd; --contrast-icon-muted: #cfcdbf; }
+[data-thread-item] > [role="button"]:has(svg.lucide-circle-dashed) { --contrast-secondary-label: var(--ph-run-label); --contrast-icon-muted: var(--ph-run-icon); }
 [data-thread-item] > [role="button"]:has(svg.lucide-circle-dashed) span[dir] { color: var(--ph-text); }
 
 /* an unsent draft: no tint at all (a warm wash reads as hover). The row keeps the faceplate
@@ -373,23 +539,25 @@ html[data-theme-id] [data-slot="sidebar"] [role="navigation"] { border-color: va
   [data-thread-item] > [role="button"]:has(svg:is(.lucide-square-pen, .lucide-pen-box, .lucide-edit)):not([aria-current="page"]):hover { background-color: var(--sidebar-row-hover); }
 }
 
-/* the open thread: a dark display window cut into the faceplate (the channel on screen).
-   Its LED runs the full height of the well and throws a lime hairline along the floor.
+/* the open thread: a display window cut into the faceplate (the channel on screen: black
+   at night, paper by day). Its LED runs the full height of the well and throws a signal
+   hairline along the floor. By day the bar and hairline print in deep acid and the glow
+   beside the bar is lime: a lit tube in daylight.
 
    Bar, glow and floor line are all FULL-HEIGHT background layers of the row itself. That is
    what makes the bar end exactly on the floor line at every display scale. A 1px-tall layer
    anchored to the bottom does not: at fractional scales (110% to 140%, 225%) the browser
-   rounds its position separately from the row's own edge, which leaves one dark pixel row
-   under the line with the bar running past it. So the floor line is painted full height and
-   the well is painted back over it everywhere except the last .8px (.8 rather than 1, so
+   rounds its position separately from the row's own edge, which leaves one pixel row of the
+   well under the line with the bar running past it. So the floor line is painted full height
+   and the well is painted back over it everywhere except the last .8px (.8 rather than 1, so
    the line is a whole number of device pixels at every common scale; zoomed out below 85%
    it needs more, or it would fall between pixels). The open row's background is always
    --sidebar-row-active; the app gives it no hover or selected colour.
-   Checked at 20 scales from 67% to 300%, on 2-line and 3-line cards, in both row states. */
+   Checked at 21 scales from 50% to 300%, on 2-line and 3-line cards, in both row states. */
 [data-thread-item] > [aria-current="page"] {
   --ph-floor: .8px;
-  box-shadow: inset 0 2px 4px -1px rgba(0, 0, 0, .9), inset 0 1px 0 0 var(--ph-cut), inset 1px 0 0 0 var(--ph-cut), inset -1px 0 0 0 var(--ph-cut);
-  background-image: linear-gradient(var(--ph-signal), var(--ph-signal)), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 38%, transparent), transparent), linear-gradient(to top, transparent var(--ph-floor), var(--sidebar-row-active) var(--ph-floor)), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 60%, transparent), var(--ph-lip) 65%);
+  box-shadow: inset 0 2px 4px -1px var(--ph-recess), inset 0 1px 0 0 var(--ph-cut), inset 1px 0 0 0 var(--ph-cut), inset -1px 0 0 0 var(--ph-cut);
+  background-image: linear-gradient(var(--ph-signal-line), var(--ph-signal-line)), linear-gradient(90deg, var(--ph-bar-glow), transparent), linear-gradient(to top, transparent var(--ph-floor), var(--sidebar-row-active) var(--ph-floor)), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal-line) 60%, transparent), var(--ph-lip) 65%);
   background-size: 2px 100%, 6px 100%, 100% 100%, 100% 100%;
   background-position: left top;
   background-repeat: no-repeat;
@@ -422,6 +590,28 @@ html[data-theme-id] [data-slot="sidebar"] [role="navigation"] { border-color: va
   --color-purple-400: #c7928a;
   --color-fuchsia-400: #f19a8b;
   --color-pink-400: #efa6b8;
+}
+/* by day the app inks monograms with the 600 shades: the same warm set, deepened for
+   putty (every key at least 4:1 on the faceplate) */
+:root:not(.dark) [data-slot="project-monogram"] {
+  --color-gray-600: #625f55;
+  --color-rose-600: #a33f4c;
+  --color-red-600: #a8392a;
+  --color-orange-600: #9c4f17;
+  --color-amber-600: #85590b;
+  --color-yellow-600: #6f5f0c;
+  --color-lime-600: #566a14;
+  --color-green-600: #3a6f33;
+  --color-emerald-600: #2c6a4a;
+  --color-teal-600: #6e6236;
+  --color-cyan-600: #536838;
+  --color-sky-600: #6f6142;
+  --color-blue-600: #725d43;
+  --color-indigo-600: #8f5230;
+  --color-violet-600: #8f4a4a;
+  --color-purple-600: #844c45;
+  --color-fuchsia-600: #a33f35;
+  --color-pink-600: #a3445f;
 }
 [data-slot="project-monogram"] svg {
   background-color: color-mix(in srgb, currentColor 10%, transparent) !important;
@@ -473,7 +663,7 @@ html[data-theme-id] [data-chat-header] {
   padding: 3px 12px 3px 9px;
   border-radius: 2px;
   background-color: var(--ph-screen);
-  box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, .9), inset 0 0 0 1px var(--ph-cut), 0 1px 0 0 var(--ph-lip);
+  box-shadow: inset 0 1px 3px 0 var(--ph-recess), inset 0 0 0 1px var(--ph-cut), 0 1px 0 0 var(--ph-lip);
 }
 [data-chat-header] nav li:not([aria-current]),
 [data-chat-header] nav li:not([aria-current]) button {
@@ -491,7 +681,7 @@ html[data-theme-id] [data-chat-header] {
   color: var(--ph-bright);
   --control-icon-color: var(--ph-bright);
   background-color: var(--ph-face2);
-  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 1px 2px 0 rgba(0, 0, 0, .5);
+  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 1px 2px 0 var(--ph-press);
 }
 [data-chat-header] [aria-pressed="true"]::after {
   content: "";
@@ -501,8 +691,8 @@ html[data-theme-id] [data-chat-header] {
   width: 10px;
   height: 2px;
   margin-left: -5px;
-  background: var(--ph-signal);
-  box-shadow: var(--ph-led-glow);
+  background: var(--ph-signal-line);
+  box-shadow: var(--ph-led-edge);
   pointer-events: none;
 }
 
@@ -528,8 +718,8 @@ html[data-theme-id] [data-chat-header] {
   background-repeat: no-repeat, no-repeat, no-repeat, repeat;
   box-shadow:
     inset 0 1px 0 0 var(--ph-cut),
-    inset 0 14px 18px -14px rgba(0, 0, 0, .95),
-    inset 12px 0 16px -12px rgba(0, 0, 0, .8);
+    inset 0 14px 18px -14px var(--ph-cast),
+    inset 12px 0 16px -12px var(--ph-cast-side);
 }
 
 /* the operator's slips: what you typed sits on the darkest face tone, a hairline and four dim
@@ -631,7 +821,7 @@ html[data-theme-id] .chat-markdown .chat-markdown-codeblock {
   padding: 0 .3125rem;
   border-radius: 1px;
   background-color: var(--ph-void);
-  box-shadow: inset 0 1px 2px 0 rgba(0,0,0,.9),0 1px 0 0 var(--ph-lip);
+  box-shadow: inset 0 1px 2px 0 var(--ph-recess),0 1px 0 0 var(--ph-lip);
   font-family: var(--ph-mono);
   font-size: .656rem;
   font-weight: 700;
@@ -641,22 +831,26 @@ html[data-theme-id] .chat-markdown .chat-markdown-codeblock {
   color: var(--ph-mute);
   pointer-events: none;
 }
-html[data-theme-id].dark .chat-markdown .chat-markdown-codeblock pre {
+/* (:root stands where the selector once said .dark: same weight, both appearances) */
+html[data-theme-id]:root .chat-markdown .chat-markdown-codeblock pre {
   background-color: var(--ph-void) !important;
-  box-shadow: inset 0 1px 0 0 var(--ph-line-s), inset 0 6px 8px -6px rgba(0, 0, 0, .9);
+  box-shadow: inset 0 1px 0 0 var(--ph-line-s), inset 0 6px 8px -6px var(--ph-recess);
   color: var(--ph-text) !important;
   font-variant-ligatures: none;
   font-variant-numeric: slashed-zero;
 }
 .chat-markdown-codeblock svg:not(.lucide) { color: var(--ph-sand) !important; }
-/* comments in true italics (Adwaita Mono ships one), so they separate by form as well as ink */
-.dark .chat-markdown-codeblock span:is([style*="737373" i], [style*="115, 115, 115)"]) { font-style: italic; }
+/* comments in true italics (Adwaita Mono ships one), so they separate by form as well as
+   ink. The highlighter writes a different stock colour per appearance, hence two hooks. */
+.dark .chat-markdown-codeblock span:is([style*="737373" i], [style*="115, 115, 115)"]),
+:root:not(.dark) .chat-markdown-codeblock span:is([style*="5c5c5c" i], [style*="92, 92, 92)"]) { font-style: italic; }
 /* keywords carry weight as a second axis, so they never blur into the types beside them
    (Adwaita Mono's bold keeps the cell width) */
-.dark .chat-markdown-codeblock span:is([style*="#ff678d" i], [style*="255, 103, 141)"]) { font-weight: 600; }
+.dark .chat-markdown-codeblock span:is([style*="#ff678d" i], [style*="255, 103, 141)"]),
+:root:not(.dark) .chat-markdown-codeblock span:is([style*="#b12251" i], [style*="177, 34, 81)"]) { font-weight: 600; }
 .chat-markdown-codeblock [aria-pressed="true"] {
   background-color: var(--ph-face);
-  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 -2px 0 0 var(--ph-signal);
+  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 -2px 0 0 var(--ph-signal-line);
 }
 
 /* tables: instrument readouts */
@@ -683,7 +877,7 @@ html[data-theme-id].dark .chat-markdown .chat-markdown-codeblock pre {
   text-decoration-thickness: 1px;
   text-underline-offset: .22em;
 }
-.chat-markdown a:hover { text-decoration-color: var(--ph-signal); }
+.chat-markdown a:hover { text-decoration-color: var(--ph-signal-line); }
 /* file chips: paths in the instrument face */
 .chat-markdown a [data-slot="context-chip-label"] { font-family: var(--ph-mono); font-size: .92em; }
 .chat-markdown a:has([data-slot="context-chip-label"]) { text-decoration: none; }
@@ -751,7 +945,7 @@ html[data-theme-id].dark .chat-markdown .chat-markdown-codeblock pre {
   background-color: var(--ph-face);
   backdrop-filter: none;
   border-radius: var(--ph-r-panel);
-  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px rgba(0, 0, 0, .95);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px var(--ph-drop-deep);
 }
 [data-slot="composer-host"] { border-radius: var(--ph-r-panel); }
 [data-slot="composer-host"]::before { backdrop-filter: none; border-radius: var(--ph-r-panel); background-color: var(--ph-face); }
@@ -766,7 +960,7 @@ html[data-theme-id].dark .chat-markdown .chat-markdown-codeblock pre {
   background-clip: border-box;
   transition: --ph-mark .2s ease;
 }
-[data-slot="composer-host"]:focus-within::after { --ph-mark: var(--ph-signal); }
+[data-slot="composer-host"]:focus-within::after { --ph-mark: var(--ph-signal-line); }
 
 /* model + effort: a readout in its own case, no tracking, so it never crowds the key */
 [data-chat-composer-form] [data-chat-provider-model-picker] {
@@ -777,16 +971,17 @@ html[data-theme-id].dark .chat-markdown .chat-markdown-codeblock pre {
 }
 
 /* the primary key: square, lit from within (no halo), with key travel: on press it drops 1px
-   and its lit top edge turns into a shadow. It does not grow under the pointer. */
+   and its lit top edge turns into a shadow. It does not grow under the pointer. By day the
+   key sits in a black bezel, which is what lets a lime lamp read on paper. */
 [data-chat-composer-form] button[type="submit"] {
   border-radius: 3px;
   scale: none;
   transition: transform 80ms ease-out;
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, .45), inset 0 -2px 0 0 rgba(0, 0, 0, .22), 0 1px 0 0 rgba(0, 0, 0, .6);
+  box-shadow: var(--ph-key-lit);
 }
 [data-chat-composer-form] button[type="submit"]:active:not(:disabled) {
   transform: translateY(1px);
-  box-shadow: inset 0 1px 0 0 rgba(0, 0, 0, .3), inset 0 -1px 0 0 rgba(255, 255, 255, .2);
+  box-shadow: var(--ph-key-down);
 }
 
 /* ---------------------------------------------------------------- 8 overlays */
@@ -801,7 +996,7 @@ html[data-theme-id].dark .chat-markdown .chat-markdown-codeblock pre {
   backdrop-filter: none;
   border: 1px solid color-mix(in srgb, var(--ph-line3) 75%, var(--ph-line2));
   border-radius: var(--ph-r-panel);
-  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px rgba(0, 0, 0, .9);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px var(--ph-drop);
 }
 [data-slot="popover-popup"]::before { box-shadow: none; }
 
@@ -811,13 +1006,13 @@ html[data-theme-id].dark .chat-markdown .chat-markdown-codeblock pre {
 :is([role="menu"], [role="listbox"], [data-slot="popover-popup"]) [data-highlighted],
 [role="menu"] [data-popup-open] {
   background-color: var(--ph-face3);
-  box-shadow: inset 2px 0 0 0 var(--ph-signal);
+  box-shadow: inset 2px 0 0 0 var(--ph-signal-line);
 }
 :is([role="menu"], [role="listbox"], [data-slot="popover-popup"]) [data-highlighted]:not([data-variant="destructive"]) { color: var(--ph-bright); }
 /* a checked or selected row is not lit: only the keyboard highlight fills a row. Its check
    becomes a lime indicator instead, so "on" and "here" never point at different rows. */
 :is([role="menu"], [role="listbox"]) :is([data-checked], [data-selected]):not([data-highlighted]) { background-color: transparent; }
-:is([role="menu"], [role="listbox"], [data-slot="popover-popup"]) :is([aria-checked="true"], [aria-selected="true"]) svg.lucide-check { color: var(--ph-signal); stroke-width: 2.2; }
+:is([role="menu"], [role="listbox"], [data-slot="popover-popup"]) :is([aria-checked="true"], [aria-selected="true"]) svg.lucide-check { color: var(--ph-signal-line); stroke-width: 2.2; }
 [role="menu"] [data-slot="menu-label"] {
   font-family: var(--ph-mono);
   font-size: var(--ph-t-legend);
@@ -838,26 +1033,28 @@ kbd {
   font-variant-numeric: slashed-zero;
   border-radius: 2px;
   background-color: var(--ph-face3);
-  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 -2px 0 0 rgba(0, 0, 0, .5), inset 0 2px 0 0 var(--ph-lip);
+  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 -2px 0 0 var(--ph-press), inset 0 2px 0 0 var(--ph-lip);
 }
 [role="menu"] kbd { color: var(--ph-mute); background: none; box-shadow: none; }
 
-/* tooltips: label-maker tape, compact (mono without tracking, so long shortcuts still fit) */
+/* tooltips: label-maker tape, compact (mono without tracking, so long shortcuts still fit).
+   The tape inverts its surroundings: bone tape on the carbon instrument, carbon tape on the
+   daylight one. */
 [data-slot="tooltip-popup"] {
-  background-color: var(--ph-text);
-  color: var(--ph-void);
+  background-color: var(--ph-tape);
+  color: var(--ph-tape-ink);
   border: 0;
   border-radius: 1px;
   font-family: var(--ph-mono);
   font-size: var(--ph-t-meta);
   letter-spacing: 0;
-  box-shadow: 0 0 0 1px var(--ph-cut), 0 8px 20px -8px rgba(0, 0, 0, .9);
+  box-shadow: 0 0 0 1px var(--ph-cut), 0 8px 20px -8px var(--ph-drop);
 }
 [data-slot="tooltip-popup"]::before { content: none; }
 
 /* ---------------------------------------------------------------- 9 dialog */
 :is([data-slot="dialog-backdrop"],[data-slot="alert-dialog-backdrop"]) {
-  background-color: color-mix(in srgb,var(--ph-void) 72%,transparent);
+  background-color: var(--ph-veil);
   backdrop-filter: none;
 }
 :is([data-slot="dialog-popup"],[data-slot="alert-dialog-popup"]):not([data-app-modal]) {
@@ -868,7 +1065,7 @@ kbd {
   backdrop-filter: none;
   border: 1px solid var(--ph-line2);
   border-radius: var(--ph-r-panel);
-  box-shadow: inset 0 1px 0 0 var(--ph-lip),0 0 0 1px var(--ph-cut),0 30px 70px -24px rgba(0,0,0,.95);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip),0 0 0 1px var(--ph-cut),0 30px 70px -24px var(--ph-drop-deep);
 }
 /* field labels in sentence case (not capitals) */
 [data-slot="dialog-popup"] label:not(:has([role="switch"])) { color: var(--ph-mute); font-weight: 550; }
@@ -878,7 +1075,7 @@ kbd {
   background-color: var(--ph-screen);
   border: 1px solid var(--ph-line2);
   border-radius: var(--ph-r-panel);
-  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 30px 80px -20px rgba(0, 0, 0, .95);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 30px 80px -20px var(--ph-drop-deep);
 }
 [data-slot="settings-group"] { border-radius: var(--ph-r-panel); }
 /* section headings are engraved panel legends */
@@ -905,8 +1102,8 @@ kbd {
   top: 8px;
   bottom: 8px;
   width: 2px;
-  background: var(--ph-signal);
-  box-shadow: var(--ph-led-glow);
+  background: var(--ph-signal-line);
+  box-shadow: var(--ph-led-edge);
 }
 [data-settings-page-scroll] output {
   font-family: var(--ph-mono);
@@ -935,8 +1132,8 @@ kbd {
   margin-top: -7px;
   border-radius: 1px;
   border: 1px solid var(--ph-line3);
-  background: linear-gradient(90deg, transparent 3px, var(--ph-signal) 3px 5px, transparent 5px), var(--ph-face2);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .7);
+  background: linear-gradient(90deg, transparent 3px, var(--ph-signal-line) 3px 5px, transparent 5px), var(--ph-face2);
+  box-shadow: 0 2px 4px var(--ph-drop-near);
 }
 
 /* ---------------------------------------------------------------- 11 terminal + details */
@@ -950,7 +1147,7 @@ kbd {
   backdrop-filter: none;
   border: 1px solid color-mix(in srgb, var(--ph-line3) 75%, var(--ph-line2));
   border-radius: var(--ph-r-panel);
-  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px rgba(0, 0, 0, .9);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px var(--ph-drop);
 }
 [data-thread-details-card] h3 {
   font-family: var(--ph-mono);
@@ -985,15 +1182,15 @@ kbd {
 [data-slot="select-trigger"] {
   border-radius: 2px;
   background-color: var(--ph-void);
-  box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, .9), 0 1px 0 0 var(--ph-lip);
+  box-shadow: inset 0 2px 4px -2px var(--ph-recess), 0 1px 0 0 var(--ph-lip);
 }
 [data-slot="sidebar-inner"] [data-slot="input-control"],
 [data-workspace-area="settings-nav"] [data-slot="input-control"],
 [data-slot="popover-popup"] [data-slot="input-control"] { background-color: transparent; box-shadow: none; }
 [data-slot="input-control"]:focus-within,
 [data-slot="textarea-control"]:focus-within {
-  border-color: var(--ph-signal);
-  box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, .9);
+  border-color: var(--ph-signal-line);
+  box-shadow: inset 0 2px 4px -2px var(--ph-recess);
 }
 
 /* disabled inputs join the one disabled rule: a hatched plate, never a faded field */
@@ -1035,7 +1232,7 @@ kbd {
 [data-slot="scroll-area-thumb"] { border-radius: 0; background-color: var(--ph-line3); }
 
 /* engaged toggles carry the LED underline (their radius already follows --control-radius) */
-[data-slot="toggle"][aria-pressed="true"] { box-shadow: inset 0 -2px 0 0 var(--ph-signal); }
+[data-slot="toggle"][aria-pressed="true"] { box-shadow: inset 0 -2px 0 0 var(--ph-signal-line); }
 
 /* The one rule for primary actions: a lit chartreuse key with carbon ink (the messageAction
    role, so every primary the app draws gets it without a selector).
@@ -1072,9 +1269,18 @@ label:has(> [role="switch"][aria-disabled="true"]) { border-color: var(--ph-line
    by ~24px all round or passes well behind it, never grazing its corners, and the index stays
    below the header. The deck and its context strip are opaque, so no ring ever runs through
    the controls. */
+/* the dial artwork, per appearance: bone ticks and a lime index on the carbon screen; by day
+   printed in black silkscreen on the paper, the live sector in deep acid and the index a lime
+   lamp in a black bezel. (A token, so the small-window rule below hides either one.) */
+:root {
+  --ph-dial: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cdefs%3E%3ClinearGradient id='v' x1='0' y1='0' x2='0' y2='1' gradientUnits='objectBoundingBox'%3E%3Cstop offset='.31' stop-color='%23fff'/%3E%3Cstop offset='.38' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cmask id='m'%3E%3Crect width='800' height='800' fill='url(%23v)'/%3E%3C/mask%3E%3C/defs%3E%3Cg fill='none' mask='url(%23m)'%3E%3Cpath d='M51.78 325.98A356 356 0 0 1 748.22 325.98' stroke='%23e7e4d6' stroke-opacity='.11'/%3E%3Cpath d='M70.99 327.06L64.15 325.54M74.48 312.78L67.72 310.97M78.6 298.66L71.92 296.56' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M88.96 286.79L76.75 282.35' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M88.65 271.04L82.19 268.36M94.57 257.58L88.23 254.62M101.08 244.39L94.87 241.16' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M124.6 241L98.62 226' stroke='%23c9fd36' stroke-opacity='0.35' stroke-width='1.6'/%3E%3Cpath d='M115.78 218.93L109.87 215.17' stroke='%23c9fd36' stroke-opacity='0.12'/%3E%3Cpath d='M123.95 206.7L118.21 202.69' stroke='%23c9fd36' stroke-opacity='0.14'/%3E%3Cpath d='M132.64 194.85L127.09 190.59' stroke='%23c9fd36' stroke-opacity='0.16'/%3E%3Cpath d='M146.44 187.24L136.48 178.88' stroke='%23c9fd36' stroke-opacity='0.24'/%3E%3Cpath d='M151.54 172.33L146.38 167.6' stroke='%23c9fd36' stroke-opacity='0.2'/%3E%3Cpath d='M161.71 161.71L156.76 156.76' stroke='%23c9fd36' stroke-opacity='0.22'/%3E%3Cpath d='M172.33 151.54L167.6 146.38' stroke='%23c9fd36' stroke-opacity='0.24'/%3E%3Cpath d='M187.24 146.44L178.88 136.48' stroke='%23c9fd36' stroke-opacity='0.33'/%3E%3Cpath d='M194.85 132.64L190.59 127.09' stroke='%23c9fd36' stroke-opacity='0.28'/%3E%3Cpath d='M206.7 123.95L202.69 118.21' stroke='%23c9fd36' stroke-opacity='0.3'/%3E%3Cpath d='M218.93 115.78L215.17 109.87' stroke='%23c9fd36' stroke-opacity='0.32'/%3E%3Cpath d='M241 124.6L226 98.62' stroke='%23c9fd36' stroke-opacity='0.6' stroke-width='1.6'/%3E%3Cpath d='M244.39 101.08L241.16 94.87' stroke='%23c9fd36' stroke-opacity='0.36'/%3E%3Cpath d='M257.58 94.57L254.62 88.23' stroke='%23c9fd36' stroke-opacity='0.38'/%3E%3Cpath d='M271.04 88.65L268.36 82.19' stroke='%23c9fd36' stroke-opacity='0.4'/%3E%3Cpath d='M286.79 88.96L282.35 76.75' stroke='%23c9fd36' stroke-opacity='0.49'/%3E%3Cpath d='M298.66 78.6L296.56 71.92' stroke='%23c9fd36' stroke-opacity='0.44'/%3E%3Cpath d='M312.78 74.48L310.97 67.72' stroke='%23c9fd36' stroke-opacity='0.46'/%3E%3Cpath d='M327.06 70.99L325.54 64.15' stroke='%23c9fd36' stroke-opacity='0.48'/%3E%3Cpath d='M342.52 74.03L340.27 61.23' stroke='%23c9fd36' stroke-opacity='0.58'/%3E%3Cpath d='M356.01 65.88L355.1 58.94' stroke='%23c9fd36' stroke-opacity='0.52'/%3E%3Cpath d='M370.63 64.28L370.02 57.31' stroke='%23c9fd36' stroke-opacity='0.54'/%3E%3Cpath d='M385.3 63.32L384.99 56.33' stroke='%23c9fd36' stroke-opacity='0.56'/%3E%3Cpath d='M414.7 63.32L415.01 56.33M429.37 64.28L429.98 57.31M443.99 65.88L444.9 58.94' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M457.48 74.03L459.73 61.23' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M472.94 70.99L474.46 64.15M487.22 74.48L489.03 67.72M501.34 78.6L503.44 71.92' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M513.21 88.96L517.65 76.75' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M528.96 88.65L531.64 82.19M542.42 94.57L545.38 88.23M555.61 101.08L558.84 94.87' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M559 124.6L574 98.62' stroke='%23e7e4d6' stroke-opacity='0.62' stroke-width='1.6'/%3E%3Cpath d='M581.07 115.78L584.83 109.87M593.3 123.95L597.31 118.21M605.15 132.64L609.41 127.09' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M612.76 146.44L621.12 136.48' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M627.67 151.54L632.4 146.38M638.29 161.71L643.24 156.76M648.46 172.33L653.62 167.6' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M653.56 187.24L663.52 178.88' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M667.36 194.85L672.91 190.59M676.05 206.7L681.79 202.69M684.22 218.93L690.13 215.17' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M675.4 241L701.38 226' stroke='%23e7e4d6' stroke-opacity='0.62' stroke-width='1.6'/%3E%3Cpath d='M698.92 244.39L705.13 241.16M705.43 257.58L711.77 254.62M711.35 271.04L717.81 268.36' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M711.04 286.79L723.25 282.35' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M721.4 298.66L728.08 296.56M725.52 312.78L732.28 310.97M729.01 327.06L735.85 325.54' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cg fill='%23e7e4d6' fill-opacity='.3' font-family='Adwaita Mono,monospace' font-size='9.5' letter-spacing='1' text-anchor='middle' dominant-baseline='central'%3E%3Ctext x='78.7' y='214.5' transform='rotate(-60 78.7 214.5)'%3E300%3C/text%3E%3Ctext x='214.5' y='78.7' transform='rotate(-30 214.5 78.7)'%3E330%3C/text%3E%3Ctext x='585.5' y='78.7' transform='rotate(30 585.5 78.7)'%3E030%3C/text%3E%3Ctext x='721.3' y='214.5' transform='rotate(60 721.3 214.5)'%3E060%3C/text%3E%3C/g%3E%3Cpath d='M393 43H407L400 56Z' fill='%23c9fd36'/%3E%3Cpath d='M400 78L400 56' stroke='%23c9fd36' stroke-opacity='0.9' stroke-width='1.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+:root:not(.dark) {
+  --ph-dial: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cdefs%3E%3ClinearGradient id='v' x1='0' y1='0' x2='0' y2='1' gradientUnits='objectBoundingBox'%3E%3Cstop offset='.31' stop-color='%23fff'/%3E%3Cstop offset='.38' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cmask id='m'%3E%3Crect width='800' height='800' fill='url(%23v)'/%3E%3C/mask%3E%3C/defs%3E%3Cg fill='none' mask='url(%23m)'%3E%3Cpath d='M51.78 325.98A356 356 0 0 1 748.22 325.98' stroke='%2324231d' stroke-opacity='0.14'/%3E%3Cpath d='M70.99 327.06L64.15 325.54M74.48 312.78L67.72 310.97M78.6 298.66L71.92 296.56' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M88.96 286.79L76.75 282.35' stroke='%2324231d' stroke-opacity='0.35'/%3E%3Cpath d='M88.65 271.04L82.19 268.36M94.57 257.58L88.23 254.62M101.08 244.39L94.87 241.16' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M124.6 241L98.62 226' stroke='%23567c02' stroke-opacity='0.44' stroke-width='1.6'/%3E%3Cpath d='M115.78 218.93L109.87 215.17' stroke='%23567c02' stroke-opacity='0.15'/%3E%3Cpath d='M123.95 206.7L118.21 202.69' stroke='%23567c02' stroke-opacity='0.18'/%3E%3Cpath d='M132.64 194.85L127.09 190.59' stroke='%23567c02' stroke-opacity='0.2'/%3E%3Cpath d='M146.44 187.24L136.48 178.88' stroke='%23567c02' stroke-opacity='0.3'/%3E%3Cpath d='M151.54 172.33L146.38 167.6' stroke='%23567c02' stroke-opacity='0.25'/%3E%3Cpath d='M161.71 161.71L156.76 156.76' stroke='%23567c02' stroke-opacity='0.28'/%3E%3Cpath d='M172.33 151.54L167.6 146.38' stroke='%23567c02' stroke-opacity='0.3'/%3E%3Cpath d='M187.24 146.44L178.88 136.48' stroke='%23567c02' stroke-opacity='0.41'/%3E%3Cpath d='M194.85 132.64L190.59 127.09' stroke='%23567c02' stroke-opacity='0.35'/%3E%3Cpath d='M206.7 123.95L202.69 118.21' stroke='%23567c02' stroke-opacity='0.38'/%3E%3Cpath d='M218.93 115.78L215.17 109.87' stroke='%23567c02' stroke-opacity='0.4'/%3E%3Cpath d='M241 124.6L226 98.62' stroke='%23567c02' stroke-opacity='0.75' stroke-width='1.6'/%3E%3Cpath d='M244.39 101.08L241.16 94.87' stroke='%23567c02' stroke-opacity='0.45'/%3E%3Cpath d='M257.58 94.57L254.62 88.23' stroke='%23567c02' stroke-opacity='0.47'/%3E%3Cpath d='M271.04 88.65L268.36 82.19' stroke='%23567c02' stroke-opacity='0.5'/%3E%3Cpath d='M286.79 88.96L282.35 76.75' stroke='%23567c02' stroke-opacity='0.61'/%3E%3Cpath d='M298.66 78.6L296.56 71.92' stroke='%23567c02' stroke-opacity='0.55'/%3E%3Cpath d='M312.78 74.48L310.97 67.72' stroke='%23567c02' stroke-opacity='0.58'/%3E%3Cpath d='M327.06 70.99L325.54 64.15' stroke='%23567c02' stroke-opacity='0.6'/%3E%3Cpath d='M342.52 74.03L340.27 61.23' stroke='%23567c02' stroke-opacity='0.72'/%3E%3Cpath d='M356.01 65.88L355.1 58.94' stroke='%23567c02' stroke-opacity='0.65'/%3E%3Cpath d='M370.63 64.28L370.02 57.31' stroke='%23567c02' stroke-opacity='0.68'/%3E%3Cpath d='M385.3 63.32L384.99 56.33' stroke='%23567c02' stroke-opacity='0.7'/%3E%3Cpath d='M414.7 63.32L415.01 56.33M429.37 64.28L429.98 57.31M443.99 65.88L444.9 58.94' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M457.48 74.03L459.73 61.23' stroke='%2324231d' stroke-opacity='0.35'/%3E%3Cpath d='M472.94 70.99L474.46 64.15M487.22 74.48L489.03 67.72M501.34 78.6L503.44 71.92' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M513.21 88.96L517.65 76.75' stroke='%2324231d' stroke-opacity='0.35'/%3E%3Cpath d='M528.96 88.65L531.64 82.19M542.42 94.57L545.38 88.23M555.61 101.08L558.84 94.87' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M559 124.6L574 98.62' stroke='%2324231d' stroke-opacity='0.78' stroke-width='1.6'/%3E%3Cpath d='M581.07 115.78L584.83 109.87M593.3 123.95L597.31 118.21M605.15 132.64L609.41 127.09' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M612.76 146.44L621.12 136.48' stroke='%2324231d' stroke-opacity='0.35'/%3E%3Cpath d='M627.67 151.54L632.4 146.38M638.29 161.71L643.24 156.76M648.46 172.33L653.62 167.6' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M653.56 187.24L663.52 178.88' stroke='%2324231d' stroke-opacity='0.35'/%3E%3Cpath d='M667.36 194.85L672.91 190.59M676.05 206.7L681.79 202.69M684.22 218.93L690.13 215.17' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M675.4 241L701.38 226' stroke='%2324231d' stroke-opacity='0.78' stroke-width='1.6'/%3E%3Cpath d='M698.92 244.39L705.13 241.16M705.43 257.58L711.77 254.62M711.35 271.04L717.81 268.36' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cpath d='M711.04 286.79L723.25 282.35' stroke='%2324231d' stroke-opacity='0.35'/%3E%3Cpath d='M721.4 298.66L728.08 296.56M725.52 312.78L732.28 310.97M729.01 327.06L735.85 325.54' stroke='%2324231d' stroke-opacity='0.19'/%3E%3Cg fill='%2324231d' fill-opacity='0.38' font-family='Adwaita Mono,monospace' font-size='9.5' letter-spacing='1' text-anchor='middle' dominant-baseline='central'%3E%3Ctext x='78.7' y='214.5' transform='rotate(-60 78.7 214.5)'%3E300%3C/text%3E%3Ctext x='214.5' y='78.7' transform='rotate(-30 214.5 78.7)'%3E330%3C/text%3E%3Ctext x='585.5' y='78.7' transform='rotate(30 585.5 78.7)'%3E030%3C/text%3E%3Ctext x='721.3' y='214.5' transform='rotate(60 721.3 214.5)'%3E060%3C/text%3E%3C/g%3E%3Cpath d='M393 43H407L400 56Z' fill='%23c9fd36' stroke='%230d1204' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='M400 78L400 56' stroke='%23567c02' stroke-opacity='1' stroke-width='1.5'/%3E%3C/g%3E%3C/svg%3E");
+}
 [data-workspace-area="conversation"] [data-timeline-loading] {
   background-color: transparent;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cdefs%3E%3ClinearGradient id='v' x1='0' y1='0' x2='0' y2='1' gradientUnits='objectBoundingBox'%3E%3Cstop offset='.31' stop-color='%23fff'/%3E%3Cstop offset='.38' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cmask id='m'%3E%3Crect width='800' height='800' fill='url(%23v)'/%3E%3C/mask%3E%3C/defs%3E%3Cg fill='none' mask='url(%23m)'%3E%3Cpath d='M51.78 325.98A356 356 0 0 1 748.22 325.98' stroke='%23e7e4d6' stroke-opacity='.11'/%3E%3Cpath d='M70.99 327.06L64.15 325.54M74.48 312.78L67.72 310.97M78.6 298.66L71.92 296.56' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M88.96 286.79L76.75 282.35' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M88.65 271.04L82.19 268.36M94.57 257.58L88.23 254.62M101.08 244.39L94.87 241.16' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M124.6 241L98.62 226' stroke='%23c9fd36' stroke-opacity='0.35' stroke-width='1.6'/%3E%3Cpath d='M115.78 218.93L109.87 215.17' stroke='%23c9fd36' stroke-opacity='0.12'/%3E%3Cpath d='M123.95 206.7L118.21 202.69' stroke='%23c9fd36' stroke-opacity='0.14'/%3E%3Cpath d='M132.64 194.85L127.09 190.59' stroke='%23c9fd36' stroke-opacity='0.16'/%3E%3Cpath d='M146.44 187.24L136.48 178.88' stroke='%23c9fd36' stroke-opacity='0.24'/%3E%3Cpath d='M151.54 172.33L146.38 167.6' stroke='%23c9fd36' stroke-opacity='0.2'/%3E%3Cpath d='M161.71 161.71L156.76 156.76' stroke='%23c9fd36' stroke-opacity='0.22'/%3E%3Cpath d='M172.33 151.54L167.6 146.38' stroke='%23c9fd36' stroke-opacity='0.24'/%3E%3Cpath d='M187.24 146.44L178.88 136.48' stroke='%23c9fd36' stroke-opacity='0.33'/%3E%3Cpath d='M194.85 132.64L190.59 127.09' stroke='%23c9fd36' stroke-opacity='0.28'/%3E%3Cpath d='M206.7 123.95L202.69 118.21' stroke='%23c9fd36' stroke-opacity='0.3'/%3E%3Cpath d='M218.93 115.78L215.17 109.87' stroke='%23c9fd36' stroke-opacity='0.32'/%3E%3Cpath d='M241 124.6L226 98.62' stroke='%23c9fd36' stroke-opacity='0.6' stroke-width='1.6'/%3E%3Cpath d='M244.39 101.08L241.16 94.87' stroke='%23c9fd36' stroke-opacity='0.36'/%3E%3Cpath d='M257.58 94.57L254.62 88.23' stroke='%23c9fd36' stroke-opacity='0.38'/%3E%3Cpath d='M271.04 88.65L268.36 82.19' stroke='%23c9fd36' stroke-opacity='0.4'/%3E%3Cpath d='M286.79 88.96L282.35 76.75' stroke='%23c9fd36' stroke-opacity='0.49'/%3E%3Cpath d='M298.66 78.6L296.56 71.92' stroke='%23c9fd36' stroke-opacity='0.44'/%3E%3Cpath d='M312.78 74.48L310.97 67.72' stroke='%23c9fd36' stroke-opacity='0.46'/%3E%3Cpath d='M327.06 70.99L325.54 64.15' stroke='%23c9fd36' stroke-opacity='0.48'/%3E%3Cpath d='M342.52 74.03L340.27 61.23' stroke='%23c9fd36' stroke-opacity='0.58'/%3E%3Cpath d='M356.01 65.88L355.1 58.94' stroke='%23c9fd36' stroke-opacity='0.52'/%3E%3Cpath d='M370.63 64.28L370.02 57.31' stroke='%23c9fd36' stroke-opacity='0.54'/%3E%3Cpath d='M385.3 63.32L384.99 56.33' stroke='%23c9fd36' stroke-opacity='0.56'/%3E%3Cpath d='M414.7 63.32L415.01 56.33M429.37 64.28L429.98 57.31M443.99 65.88L444.9 58.94' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M457.48 74.03L459.73 61.23' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M472.94 70.99L474.46 64.15M487.22 74.48L489.03 67.72M501.34 78.6L503.44 71.92' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M513.21 88.96L517.65 76.75' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M528.96 88.65L531.64 82.19M542.42 94.57L545.38 88.23M555.61 101.08L558.84 94.87' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M559 124.6L574 98.62' stroke='%23e7e4d6' stroke-opacity='0.62' stroke-width='1.6'/%3E%3Cpath d='M581.07 115.78L584.83 109.87M593.3 123.95L597.31 118.21M605.15 132.64L609.41 127.09' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M612.76 146.44L621.12 136.48' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M627.67 151.54L632.4 146.38M638.29 161.71L643.24 156.76M648.46 172.33L653.62 167.6' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M653.56 187.24L663.52 178.88' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M667.36 194.85L672.91 190.59M676.05 206.7L681.79 202.69M684.22 218.93L690.13 215.17' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M675.4 241L701.38 226' stroke='%23e7e4d6' stroke-opacity='0.62' stroke-width='1.6'/%3E%3Cpath d='M698.92 244.39L705.13 241.16M705.43 257.58L711.77 254.62M711.35 271.04L717.81 268.36' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M711.04 286.79L723.25 282.35' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M721.4 298.66L728.08 296.56M725.52 312.78L732.28 310.97M729.01 327.06L735.85 325.54' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cg fill='%23e7e4d6' fill-opacity='.3' font-family='Adwaita Mono,monospace' font-size='9.5' letter-spacing='1' text-anchor='middle' dominant-baseline='central'%3E%3Ctext x='78.7' y='214.5' transform='rotate(-60 78.7 214.5)'%3E300%3C/text%3E%3Ctext x='214.5' y='78.7' transform='rotate(-30 214.5 78.7)'%3E330%3C/text%3E%3Ctext x='585.5' y='78.7' transform='rotate(30 585.5 78.7)'%3E030%3C/text%3E%3Ctext x='721.3' y='214.5' transform='rotate(60 721.3 214.5)'%3E060%3C/text%3E%3C/g%3E%3Cpath d='M393 43H407L400 56Z' fill='%23c9fd36'/%3E%3Cpath d='M400 78L400 56' stroke='%23c9fd36' stroke-opacity='0.9' stroke-width='1.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: var(--ph-dial);
   background-size: min(calc(2 * var(--ph-lane-hw,23rem) + 64px),calc((50vh - 56px) * 2.1)) auto;
   background-position: calc(50% + (var(--chat-lane-inset-start,0px) - var(--chat-lane-inset-end,0px)) / 2) calc(50% - 1.625rem);
   background-repeat: no-repeat;
@@ -1095,6 +1301,13 @@ label:has(> [role="switch"][aria-disabled="true"]) { border-color: var(--ph-line
   text-decoration-color: var(--ph-signal);
   text-decoration-thickness: 2px;
   text-underline-offset: .18em;
+}
+/* by day a 2px lime line would vanish on the paper: the project name is marked the way you
+   mark a calibration sheet, with a lime highlighter swipe under black ink */
+:root:not(.dark) [data-workspace-area="composer"] h1 button {
+  text-decoration-thickness: .36em;
+  text-underline-offset: -.2em;
+  text-decoration-skip-ink: none;
 }
 /* the context strip under the deck: mono data, on an opaque screen-coloured band (invisible
    on the screen, but nothing behind it shows through) */
@@ -1129,7 +1342,20 @@ label:has(> [role="switch"][aria-disabled="true"]) { border-color: var(--ph-line
   [data-slot="button"] { transition: none; }
 }
 
-/* ---------------------------------------------------------------- 15 syntax
+/* ---------------------------------------------------------------- 15 daylight guards
+   The app also paints its primary colour (lime, the messageAction role) as TEXT, BORDERS and
+   RINGS: check icons in settings, "Default" tags, drop targets, JSON strings in previews. On
+   carbon that is fine; on paper lime cannot carry a mark, so by day those take the deep
+   acid. These hook on the app's own utility names, so they are a safety net, not a
+   dependency: if the names change, those marks fall back to lime and nothing else moves. */
+:root:not(.dark) :is([class~="text-primary"], [class~="text-primary/70"], [class*="--app-theme-message-action"]) { color: var(--ph-signal-line); }
+:root:not(.dark) [class*="border-primary/"] { border-color: color-mix(in srgb, var(--ph-signal-line) 55%, transparent); }
+:root:not(.dark) [class*="ring-primary"] { --tw-ring-color: var(--ph-signal-line); }
+/* the model picker's provider rail marks the selected provider with a thin primary bar: by
+   day it becomes an LED like the others (deep-acid core, lime halo) */
+:root:not(.dark) [data-model-picker-selected-indicator] { background-color: var(--ph-signal-line); box-shadow: var(--ph-led-edge); }
+
+/* ---------------------------------------------------------------- 16 syntax
    Code tokens are inline styles from the app's highlighter; only !important reaches them.
    Eight classes spread by hue AND lightness inside the warm half of the wheel (no blue, violet, cyan or teal):
    deep coral keywords (also bold, see 6), apricot types, straw functions, leaf strings, pink literals,
@@ -1157,10 +1383,33 @@ label:has(> [role="switch"][aria-disabled="true"]) { border-color: var(--ph-line
 .dark .chat-markdown-codeblock span[style*="#07c480" i],.dark .chat-markdown-codeblock span[style*="rgb(7, 196, 128)"]{color:#84dd98 !important}
 .dark .chat-markdown-codeblock span[style*="#ff2e3f" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 46, 63)"]{color:#ff9483 !important}
 .dark .chat-markdown-codeblock span[style*="#ffca00" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 202, 0)"]{color:#ffc459 !important}
+/* daylight: the same eight classes inked for paper, every one at least 5:1 on the code window
+   and spread by hue and lightness: oxblood keywords (bold), burnt-orange types, mustard
+   functions, leaf strings, raspberry literals, ink identifiers, italic graphite comments,
+   graphite punctuation. Generated by tools/syntax-remap.mjs from the light stock colours. */
+:root:not(.dark) .chat-markdown-codeblock span[style*="#b12251" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(177, 34, 81)"]{color:#9b2620 !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#a43d23" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(164, 61, 35)"]{color:#9b2620 !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#912ba7" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(145, 43, 167)"]{color:#a65800 !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#693acf" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(105, 58, 207)"]{color:#735600 !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#106a2b" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(16, 106, 43)"]{color:#2a6a1f !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#735b02" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(115, 91, 2)"]{color:#a3145f !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#0b5267" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(11, 82, 103)"]{color:#a3145f !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#0b685b" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(11, 104, 91)"]{color:#8f5300 !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#0d6971" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(13, 105, 113)"]{color:#a3303e !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#006781" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(0, 103, 129)"]{color:#46423a !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#8f4e17" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(143, 78, 23)"]{color:#24231d !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#7e540e" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(126, 84, 14)"]{color:#a1420d !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#4b4b4b" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(75, 75, 75)"]{color:#67635a !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#00609f" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(0, 96, 159)"]{color:#5f5636 !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#0e6944" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(14, 105, 68)"]{color:#1f6648 !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#0d4c7d" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(13, 76, 125)"]{color:#8f5300 !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#5c5c5c" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(92, 92, 92)"]{color:#6f6b5f !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#0a0a0a" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(10, 10, 10)"]{color:#24231d !important}
+:root:not(.dark) .chat-markdown-codeblock span[style*="#b3242c" i],:root:not(.dark) .chat-markdown-codeblock span[style*="rgb(179, 36, 44)"]{color:#b02a20 !important}
 
 /* Rich hover cards (thread preview, pull-request list) are tooltips too, but their text is
-   light: they must be dark panels, never label tape. Two hooks on purpose: the app's glass
-   variant class, and the structure (a block element inside the viewport). */
+   panel ink: they must be faceplate modules, never label tape. Two hooks on purpose: the
+   app's glass variant class, and the structure (a block element inside the viewport). */
 [data-slot="tooltip-popup"]:is(.dropdown-glass,:has(> [data-slot="tooltip-viewport"] > :is(div,ul,ol,section,article,table))) {
   background-color: var(--ph-face2);
   color: var(--ph-text);
@@ -1170,12 +1419,12 @@ label:has(> [role="switch"][aria-disabled="true"]) { border-color: var(--ph-line
   font-size: .75rem;
   letter-spacing: normal;
   backdrop-filter: none;
-  box-shadow: inset 0 1px 0 0 var(--ph-lip),0 0 0 1px var(--ph-cut),0 16px 40px -16px rgba(0,0,0,.9);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip),0 0 0 1px var(--ph-cut),0 16px 40px -16px var(--ph-drop);
 }
-/* ...and inside plain label-tape tooltips, muted hints (shortcuts) switch to dark ink */
+/* ...and inside plain label-tape tooltips, muted hints (shortcuts) take the tape's inks */
 [data-slot="tooltip-popup"]:not(.dropdown-glass):not(:has(> [data-slot="tooltip-viewport"] > :is(div,ul,ol,section,article,table))) {
-  --contrast-foreground: var(--ph-void);
-  --contrast-muted-foreground: #3b3b34;
-  --contrast-secondary-label: #3b3b34;
-  --contrast-popover-foreground: var(--ph-void);
+  --contrast-foreground: var(--ph-tape-ink);
+  --contrast-muted-foreground: var(--ph-tape-mute);
+  --contrast-secondary-label: var(--ph-tape-mute);
+  --contrast-popover-foreground: var(--ph-tape-ink);
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0 (2026-11-19)
+
+- Added: a light appearance, Daylight. A bone-putty faceplate around a paper screen, black
+  silkscreen legends, lime as a lit fill, and a deep acid green for thin signal marks.
+  `acid-01.json` carries it as its light variant, so the theme now follows T3 Code's light/dark
+  setting. `acid-01-light.json` is the same appearance as a theme of its own.
+- Changed: `build.mjs` writes both files, refuses a variant that misses a color role, and runs
+  T3 Code's own file-loading check (ported from `themeCssLoadsRemoteFiles`).
+- Dark is unchanged: its renders are identical to 1.0.4. The open thread's bar and floor line
+  pass the display-scale check in both appearances (1512 of 1512 cases).
+
 ## 1.0.4 (2026-11-19)
 
 - Fixed: on displays scaled to 110% to 140% (and 225%) the open thread's bar and the hazard
