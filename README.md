@@ -9,7 +9,7 @@ putty and paper.
 
 | New thread | Menus and model picker |
 | --- | --- |
-| ![New thread screen with the scope](screenshots/empty.png) | ![Menu, submenu, model picker and a tooltip](screenshots/menus.png) |
+| ![New thread screen](screenshots/empty.png) | ![Menu, submenu, model picker and a tooltip](screenshots/menus.png) |
 
 | Terminal and thread details | Controls |
 | --- | --- |
@@ -42,7 +42,7 @@ sample content), not captures of the live app.
   class stands apart. Nothing in the theme is blue, violet or cyan.
 - **Instrument details.** Ruler scales along the panel edges, registration brackets on the composer that light up
   on focus, engraved mono legends, label-tape tooltips, square switches, hatched disabled controls, keys that travel
-  one pixel when pressed, and a radar-style scope around the composer on the new-thread screen.
+  one pixel when pressed, and a quiet sheet of fine dots behind the new-thread screen.
 - **Daylight.** In the light appearance lime stays a lit fill with black ink on it (send key, switches, primary
   buttons). Thin signal marks such as the focus ring and the open thread's bar use a deep acid green, because
   lime lines vanish on paper.
@@ -86,20 +86,19 @@ The community gallery at [t3themes.com](https://t3themes.com) limits theme CSS t
 src/theme.meta.json   names, and all 61 color roles for each appearance
 src/theme.css         the stylesheet, commented; every color is a token at the top, once per appearance
 build.mjs             packs both into acid-01.json and acid-01-light.json (no dependencies)
-tools/gen-scope.mjs   draws the new-thread scope into src/theme.css; takes a level from loud to c
 ```
 
 ```bash
 node build.mjs
 ```
 
-The new-thread scope ships at level `b`, the plain one. `node tools/gen-scope.mjs a && node build.mjs` turns it
-up a step (more ticks, legends, a longer afterglow); `c` leaves only hairline rings and the sweep line.
+The new-thread screen's dot field has one knob, `--ph-grid-k` in section 13 of `src/theme.css`, which scales
+the dots' opacity.
 
 One stylesheet serves both appearances: the rules are shared and only the tokens differ. The build strips
 comments and whitespace, refuses a light variant that misses a color role, and refuses CSS that T3 Code would
 reject (anything that loads a file, or a value containing a backslash). T3 Code allows 100,000 characters of
-theme CSS; this theme uses about 59,000.
+theme CSS; this theme uses about 49,000.
 
 ## Limits you should know about
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0 (2026-11-19)
+
+- Changed: the new-thread screen has no artwork any more. The scope added in 1.2.0, and the dial
+  before it, are replaced by one even field of 1px dots every 20px across the whole screen,
+  fading out at the window edges, with clear bands behind the two lines of small type. In
+  Daylight the dots are ink on paper. The spacing lands on whole device pixels at 100%, 125%,
+  130%, 150% and 200%, so every dot is one solid pixel.
+- Removed: `tools/gen-scope.mjs`.
+- Every other screen is unchanged.
+
 ## 1.2.0 (2026-11-19)
 
 - Changed: the new-thread screen. The faint calibration dial is replaced by a plan-position scope
