@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.4 (2026-11-19)
+
+- Fixed: on displays scaled to 110% to 140% (and 225%) the open thread's bar and the hazard
+  tape ran one pixel past the lime floor line. The line was a 1px layer anchored to the bottom
+  of the row, and at those scales the browser rounds such a layer to the pixel row above the
+  row's own edge. Bar, glow and floor line are now all full-height layers, so they end on the
+  same pixel row. Checked at 21 scales from 50% to 300%, on 2-line and 3-line cards, with and
+  without the "needs you" tape: 756 of 756 cases, where 1.0.3 fails 150. Nothing changes at
+  100% and 200%.
+
 ## 1.0.3 (2026-11-19)
 
 - Changed: the open thread's highlight is back to the original full-height bar with a lime

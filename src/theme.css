@@ -375,18 +375,30 @@ html[data-theme-id] [data-slot="sidebar"] [role="navigation"] { border-color: va
 
 /* the open thread: a dark display window cut into the faceplate (the channel on screen).
    Its LED runs the full height of the well and throws a lime hairline along the floor.
-   Bar, glow and hairline are three background layers of the row itself, all anchored to its
-   bottom edge, so the bar ends exactly on the hairline and follows the well's corners. (As a
-   separate ::before the bar could run a pixel past the hairline in the live app.) */
+
+   Bar, glow and floor line are all FULL-HEIGHT background layers of the row itself. That is
+   what makes the bar end exactly on the floor line at every display scale. A 1px-tall layer
+   anchored to the bottom does not: at fractional scales (110% to 140%, 225%) the browser
+   rounds its position separately from the row's own edge, which leaves one dark pixel row
+   under the line with the bar running past it. So the floor line is painted full height and
+   the well is painted back over it everywhere except the last .8px (.8 rather than 1, so
+   the line is a whole number of device pixels at every common scale; zoomed out below 85%
+   it needs more, or it would fall between pixels). The open row's background is always
+   --sidebar-row-active; the app gives it no hover or selected colour.
+   Checked at 20 scales from 67% to 300%, on 2-line and 3-line cards, in both row states. */
 [data-thread-item] > [aria-current="page"] {
+  --ph-floor: .8px;
   box-shadow: inset 0 2px 4px -1px rgba(0, 0, 0, .9), inset 0 1px 0 0 var(--ph-cut), inset 1px 0 0 0 var(--ph-cut), inset -1px 0 0 0 var(--ph-cut);
-  background-image: linear-gradient(var(--ph-signal), var(--ph-signal)), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 38%, transparent), transparent), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 60%, transparent), var(--ph-lip) 65%);
-  background-size: 2px 100%, 6px 100%, 100% 1px;
-  background-position: left bottom, left bottom, left bottom;
+  background-image: linear-gradient(var(--ph-signal), var(--ph-signal)), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 38%, transparent), transparent), linear-gradient(to top, transparent var(--ph-floor), var(--sidebar-row-active) var(--ph-floor)), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 60%, transparent), var(--ph-lip) 65%);
+  background-size: 2px 100%, 6px 100%, 100% 100%, 100% 100%;
+  background-position: left top;
   background-repeat: no-repeat;
 }
+@media (max-resolution: .85dppx) {
+  [data-thread-item] > [aria-current="page"] { --ph-floor: 1.6px; }
+}
 /* the open thread can also need you: the LED steps inside the hazard tape */
-[data-thread-item] > [aria-current="page"]:has(svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2)) { background-position: 6px bottom, 6px bottom, left bottom; }
+[data-thread-item] > [aria-current="page"]:has(svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2)) { background-position: 6px top, 6px top, left top, left top; }
 
 /* monograms: colour-coded keys. Each project keeps its own hue (the app hashes one of 18),
    folded into a warm, muted set that never meets the lamps or the forbidden blues. The set is
