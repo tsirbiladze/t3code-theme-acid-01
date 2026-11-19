@@ -5,9 +5,10 @@
 
 ![An open thread in the gallery edition](chat.png)
 
-It is the same theme to look at. In the eight views the full theme is checked against, the core edition matches
-its render on more than 99% of pixels. What it leaves out is small: the gauge's lime sector does not brighten
-toward the pointer, legends have no engraved shadow, some already-warm syntax colors keep the highlighter's own
+It is the same theme to look at, with one exception: the new-thread screen keeps the calibration dial that the
+full theme had up to 1.1.0, because the scope that replaced it in 1.2.0 does not fit the limit. On every other
+screen the core edition matches the full theme's render on more than 99% of pixels. What else it leaves out is
+small: legends have no engraved shadow, some already-warm syntax colors keep the highlighter's own
 values, badges are a size smaller, and there are no transitions.
 
 ```

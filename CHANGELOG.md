@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 (2026-11-19)
+
+- Changed: the new-thread screen. The faint calibration dial is replaced by a plan-position scope
+  with the composer as its hub: a quiet bearing ring with ticks every 10 and 30 degrees, range
+  rings, a lime index at 000 above the question, and one thin lime sweep with a short afterglow
+  and a single return. In Daylight it is a printed plotting sheet with a highlighter wedge.
+  Shorter windows get a compact scope; below 1024px wide or 640px tall there is none.
+- Added: `tools/gen-scope.mjs`, which draws the scope at four levels from `loud` to `c`. The
+  theme ships level `b`.
+- Every other screen is unchanged. The gallery edition keeps the earlier dial.
+
 ## 1.1.0 (2026-11-19)
 
 - Added: a light appearance, Daylight. A bone-putty faceplate around a paper screen, black
