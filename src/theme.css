@@ -1,0 +1,1178 @@
+/* ACID-01 · Carbon Instrument: a theme for T3 Code (https://github.com/pingdotgg/t3code).
+   This file is the readable source. `node build.mjs` packs it, together with
+   src/theme.meta.json, into acid-01.json, the file T3 Code installs.
+   Comments and whitespace are stripped on the way; nothing here loads a file. */
+
+/* palette tokens: every color the CSS uses is named here once */
+:root {
+  --ph-void: #060604;
+  --ph-screen: #0b0b09;
+  --ph-screen2: #12120f;
+  --ph-face-lo: #181814;
+  --ph-face: #1e1e1a;
+  --ph-face2: #252521;
+  --ph-face3: #2d2d28;
+  --ph-active-row: #0a0a08;
+  --ph-line-s: #22221e;
+  --ph-line-f: #32322e;
+  --ph-line2: #41413c;
+  --ph-line3: #5d5d56;
+  --ph-dim: #8f8e83;
+  --ph-mute: #b5b3a6;
+  --ph-text: #e7e4d6;
+  --ph-bright: #f7f6ea;
+  --ph-signal: #c9fd36;
+  --ph-signal-hover: #e1ffa7;
+  --ph-signal-deep: #89af11;
+  --ph-signal-ink: #0d1204;
+  --ph-signal-wash: #28330d;
+  --ph-amber: #feb433;
+  --ph-amber-text: #ffc459;
+  --ph-amber-ink: #261501;
+  --ph-amber-wash: #2b1c06;
+  --ph-red: #d23934;
+  --ph-red-text: #ff9483;
+  --ph-red-edge: #e3584c;
+  --ph-red-wash: #35110d;
+  --ph-green: #6bd586;
+  --ph-green-text: #84dd98;
+  --ph-sand: #ddd5b4;
+  --ph-sand-dim: #b2ab8f;
+}
+
+/* ============================================================================
+   ACID-01 · CARBON INSTRUMENT  (round 3, precision build)
+   ----------------------------------------------------------------------------
+   T3 Code as a piece of precision test equipment, built from two materials,
+   both carbon:
+     FACEPLATE  machined carbon: sidebar, header, composer deck, overlays,
+                dialogs. Engraved legends, calibrated scales, registration
+                marks, milled edges.
+     SCREEN     a near-black display set into the faceplate: the
+                conversation, code windows, terminal, input wells. One plane:
+                nothing chrome-bright floats on it.
+   The two are 1.2:1 apart; the frame is drawn by its machined edge (a light
+   lip on the face, a void line on the screen), as on real hardware.
+   Two lamps, each with one job:
+     SIGNAL     electric chartreuse = yours / act / on: the open channel, the
+                primary key, focus, engaged toggles, checked items, the dial's
+                index. Scarce on purpose, never absent.
+     CAUTION    amber + hazard tape = the machine is waiting for you.
+                Failed is a red lamp; everything else is plain text.
+   Type: Inter for prose and titles; Adwaita Mono for data in its own case;
+   mono capitals only for system legends. Small type is set in rem, so it
+   follows the interface font size. Nothing is blue.
+
+   1 tokens · 2 base · 3 shell · 4 sidebar · 5 header · 6 conversation ·
+   7 composer · 8 overlays · 9 dialog · 10 settings · 11 terminal + details ·
+   12 primitives · 13 empty state · 14 motion   (15 syntax is generated)
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- 1 tokens */
+:root {
+  /* Adwaita Mono (Iosevka-derived, installed system-wide) is the instrument face */
+  --ph-mono: "Adwaita Mono", "JetBrainsMono Nerd Font Mono", "JetBrains Mono", Hack, "Noto Sans Mono", "Liberation Mono", monospace;
+  --font-mono: var(--ph-mono);
+
+  /* machined shape language: 0-3px everywhere */
+  --radius: 4px;
+  --control-radius: 2px;
+  --ph-r-panel: 3px;
+
+  /* opaque materials: no glass anywhere, so no blur work either */
+  --glass-blur: 0px;
+
+  /* the small-type floor, in rem (this user runs a 16px interface font) */
+  --ph-t-legend: .656rem;   /* 10.5px: status chips, panel legends, badges */
+  --ph-t-meta: .6875rem;    /* 11px: project and time meta, tooltips, search legends */
+
+  /* silkscreen ink for scales: minor ticks quiet, majors legible */
+  --ph-silk-lo: color-mix(in srgb, var(--ph-text) 15%, transparent);
+  --ph-silk: color-mix(in srgb, var(--ph-text) 28%, transparent);
+  --ph-silk-hi: color-mix(in srgb, var(--ph-text) 46%, transparent);
+
+  /* the machined edge: a lit lip on the faceplate, a void cut beside it */
+  --ph-lip: color-mix(in srgb, var(--ph-text) 9%, transparent);
+  --ph-cut: rgba(0, 0, 0, .7);
+  /* engraved legends: a 1px shadow under mono capitals on the faceplate */
+  --ph-engrave: 0 1px 0 rgba(0, 0, 0, .55);
+
+  /* glow budget: only 2px indicator LEDs may glow, and only this much */
+  --ph-led-glow: 0 0 4px 0 color-mix(in srgb, var(--ph-signal) 55%, transparent);
+
+  /* caution: amber hazard stripes on carbon */
+  --ph-hazard: repeating-linear-gradient(-45deg, var(--ph-amber) 0 3px, var(--ph-void) 3px 6px);
+  /* lockout: the one disabled pattern, a fine 45-degree hatch on a neutral plate */
+  --ph-hatch: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--ph-line3) 40%, transparent) 0 1px, transparent 1px 4px);
+
+  /* registration marks (see "marks"): arm length and stroke are set per panel */
+  --ph-mark-len: 9px;
+  --ph-mark-w: 1px;
+
+  /* the display graticule: one bone dot every 24px (kept out of the reading lane, see 6) */
+  --ph-grid: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect width='1' height='1' fill='%23e7e4d6' fill-opacity='.12'/%3E%3C/svg%3E");
+
+  /* Tailwind palettes the app hard-codes are folded into the instrument palette. The
+     statuses follow the lamps even without this theme's sidebar rules: indigo marks
+     "Input" (needs you) so it becomes caution amber; blue/sky (info, running) become
+     sand; teal/cyan (running terminals) become sand; violet/purple become brass;
+     fuchsia becomes rust; emerald stays the theme's green. */
+  --color-indigo-300: #ffc459; --color-indigo-400: #feb433; --color-indigo-500: #feb433; --color-indigo-600: #e09a1c;
+  --color-blue-400: #ddd5b4; --color-blue-500: #cfc59c; --color-blue-600: #b8ad83; --color-blue-700: #9d936c;
+  --color-sky-300: #e8e1c4; --color-sky-400: #ddd5b4; --color-sky-500: #cfc59c; --color-sky-600: #b8ad83;
+  --color-cyan-400: #ddd5b4; --color-cyan-500: #cfc59c; --color-cyan-600: #b8ad83;
+  --color-teal-300: #e8e1c4; --color-teal-400: #ddd5b4; --color-teal-500: #cfc59c; --color-teal-600: #b8ad83;
+  --color-violet-300: #e3c98e; --color-violet-400: #d6b46a; --color-violet-500: #c49f52; --color-violet-600: #a98843;
+  --color-purple-400: #d6b46a; --color-purple-500: #c49f52; --color-purple-600: #a98843;
+  --color-fuchsia-300: #f0a58a; --color-fuchsia-400: #e88a6a; --color-fuchsia-500: #d9704f; --color-fuchsia-600: #c25c3e;
+  --color-emerald-300: #9fe6ae; --color-emerald-400: #84dd98; --color-emerald-500: #4fc06e; --color-emerald-600: #3ba35a; --color-emerald-700: #2f8549;
+}
+
+/* App tokens the dark root re-declares at (0,2,0), restated one notch higher. info is the
+   quiet "running" sand and success a calm green: neither competes with the two lamps. */
+html:root.dark {
+  --info: var(--ph-sand);
+  --info-foreground: var(--ph-sand);
+  --success: var(--ph-green);
+  --success-foreground: var(--ph-green-text);
+  --guest: #e88a6a;
+  --guest-foreground: #f0a58a;
+  --app-scrollbar-thumb: var(--ph-line2);
+  --app-scrollbar-thumb-hover: var(--ph-line3);
+  --glass-blur: 0px;
+  --glass-saturation: 1;
+}
+
+/* Context-chip inks are written inline on <html>; re-declaring them on <body> wins for
+   every descendant, portalled popups included. */
+body {
+  --context-chip-image: #ddd5b4;
+  --context-chip-video: #e88a6a;
+  --context-chip-file: #ddd5b4;
+  --context-chip-mention: #f2efe2;
+  --context-chip-terminal: #ddd5b4;
+  --context-chip-element: #feb433;
+  --context-chip-preview-annotation: #feb433;
+  --context-chip-review-comment: #d6b46a;
+  --context-chip-pull-request: #ddd5b4;
+  --context-chip-pr-open: #84dd98;
+  --context-chip-pr-draft: #b5b3a6;
+  --context-chip-pr-merged: #d6b46a;
+  --context-chip-pr-closed: #ff9483;
+  --context-chip-skill: #e3c98e;
+  --context-chip-model: #cfc59c;
+  --context-chip-thread: #ddd5b4;
+  --context-chip-environment: #9fe6ae;
+  --context-chip-citation: #ddd5b4;
+  --context-chip-doc-pdf: #ff9483;
+  --context-chip-doc-word: #ddd5b4;
+  --context-chip-doc-spreadsheet: #84dd98;
+  --context-chip-doc-slides: #e88a6a;
+  --context-chip-doc-epub: #d6b46a;
+  --context-chip-invalid: #ff9483;
+}
+
+/* ---------------------------------------------------------------- 2 base */
+/* selection: a chartreuse tint over the text, never a solid slab */
+::selection { background-color: color-mix(in srgb, var(--ph-signal) 30%, transparent); }
+input, textarea, .composer-tiptap { caret-color: var(--ph-signal); }
+
+/* hairline icons with squared ends: drawn, not stamped */
+svg.lucide { stroke-width: 1.65; stroke-linecap: square; stroke-linejoin: miter; }
+
+/* native scrollbars: a thin machined rail */
+::-webkit-scrollbar-thumb { background: var(--ph-line2); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--ph-line3); }
+
+/* marks: L-shaped registration brackets in the corners of a panel. The gradient is declared
+   on each panel so that panel's own --ph-mark colour resolves. Longhands only, so a panel
+   keeps its background-color even if a gradient were ever rejected. */
+[data-slot="composer-host"]::after,
+[data-user-message-bubble]::after,
+:is([data-slot="menu-popup"], [role="menu"]),
+[data-slot="popover-popup"],
+[data-slot="select-popup"] > div,
+:is([data-slot="dialog-popup"],[data-slot="alert-dialog-popup"]):not([data-app-modal]),
+[data-thread-details-card] {
+  --ph-mark: var(--ph-line3);
+  --ph-mi: linear-gradient(var(--ph-mark), var(--ph-mark));
+  background-image: var(--ph-mi), var(--ph-mi), var(--ph-mi), var(--ph-mi), var(--ph-mi), var(--ph-mi), var(--ph-mi), var(--ph-mi);
+  background-size:
+    var(--ph-mark-len) var(--ph-mark-w), var(--ph-mark-w) var(--ph-mark-len), var(--ph-mark-len) var(--ph-mark-w), var(--ph-mark-w) var(--ph-mark-len),
+    var(--ph-mark-len) var(--ph-mark-w), var(--ph-mark-w) var(--ph-mark-len), var(--ph-mark-len) var(--ph-mark-w), var(--ph-mark-w) var(--ph-mark-len);
+  background-position: left top, left top, right top, right top, left bottom, left bottom, right bottom, right bottom;
+  background-repeat: no-repeat;
+}
+
+/* ---------------------------------------------------------------- 3 shell */
+/* The machined edge where the faceplate meets the display: the faceplate's last pixel is a
+   lit lip, the next is a void cut, then the recessed screen (its shading is in 6). Under a
+   theme the app paints the sidebar border with the sidebar FOREGROUND at (0,2,1), hence the
+   specificity of the cut. */
+html[data-theme-id] [data-slot="sidebar"] [role="navigation"] { border-color: var(--ph-cut); }
+
+/* The faceplate carries a vertical scale along that edge (minor ticks every 8px, mid every
+   32, major every 64) and the lip. It is smooth powder-coat: this replaces the app's
+   turbulence grain on the sidebar, so no noise filter is rasterised anywhere in the frame. */
+[data-slot="sidebar-inner"] {
+  background-image:
+    linear-gradient(var(--ph-lip), var(--ph-lip)),
+    repeating-linear-gradient(to bottom, var(--ph-silk-hi) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(to bottom, var(--ph-silk) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(to bottom, var(--ph-silk-lo) 0 1px, transparent 1px 8px);
+  background-size: 1px 100%, 9px 100%, 6px 100%, 4px 100%;
+  background-position: right top, right 1px top, right 1px top, right 1px top;
+  background-repeat: no-repeat;
+}
+
+/* ---------------------------------------------------------------- 4 sidebar */
+/* "Nightly" environment pill: an engraved model plate. It sits in the app's wrapping,
+   overflow-hidden brand row, which hides it outright if it does not fit, so it is kept under
+   60px: light tracking, and the trailing letter-space paid back on the left so the legend
+   stays optically centred. */
+[data-slot="sidebar-inner"] [data-environment-identification] {
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-legend);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-shadow: var(--ph-engrave);
+  color: var(--ph-mute);
+  background: transparent;
+  border: 1px solid var(--ph-line2);
+  border-radius: 1px;
+  padding-inline: calc(.3em + .08em) .3em;
+}
+
+/* search legends (sidebar, settings nav, model picker): one rule, mono capitals engraved on
+   the panel. Boxed text fields elsewhere keep plain sentence-case placeholders. */
+:is([data-slot="sidebar-inner"], [data-workspace-area="settings-nav"], [data-slot="popover-popup"]) input::placeholder {
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-meta);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-shadow: var(--ph-engrave);
+}
+
+/* the update key in the footer: squared like every other key, its "ready" dot a signal LED */
+[data-slot="sidebar-inner"] button:has(svg.lucide-download) { border-radius: 2px; box-shadow: inset 0 0 0 1px var(--ph-line-f); }
+[data-slot="sidebar-inner"] button:has(svg.lucide-download) span[aria-hidden="true"] {
+  border-radius: 0;
+  background-color: var(--ph-signal);
+  box-shadow: 0 0 0 2px var(--ph-face), var(--ph-led-glow);
+}
+
+/* the footer controls read as their own strip below a dotted rule (painted, no layout change) */
+[data-slot="sidebar-inner"] [data-slot="sidebar-footer"] {
+  background-image: repeating-linear-gradient(90deg, var(--ph-line2) 0 1px, transparent 1px 3px);
+  background-size: calc(100% - 20px) 1px;
+  background-position: 10px 0;
+  background-repeat: no-repeat;
+}
+
+/* thread rows: a dotted leader between channels, painted on the li inside its own box */
+[data-thread-item] {
+  background-image: repeating-linear-gradient(90deg, var(--ph-line-f) 0 1px, transparent 1px 3px);
+  background-size: calc(100% - 20px) 1px;
+  background-position: 10px 100%;
+  background-repeat: no-repeat;
+}
+
+/* the project / status line: data in its own case, mono, tabular, slashed zero. Cards hook
+   on the monogram's siblings (project name, status slot); folder rows hook on the status
+   slot itself, the span that carries the row's Settle action. Status legends below are the
+   only capitals. A pure enhancement: if a hook stops matching, the app's own Inter returns. */
+[data-thread-item] [data-slot="project-monogram"] ~ span,
+[data-thread-item] span:has(svg.lucide-check) {
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-meta);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+/* the meta line (branch, PR) stays in Inter: the app middle-truncates branches with
+   JS-measured clip values, which a font swap would put out of step */
+
+/* ---- status annunciators. The hooks are the status icons (old and new lucide names); if
+   they ever stop matching, the colour roles alone still read: caution amber for Approval and
+   Input, sand for running, red for failed, green for done.
+   Three forms only: an amber lamp (needs you), a red lamp (failed), plain text (the rest).
+   Every legend shares one size and one box, so lamps and plain legends sit on one baseline. */
+[data-thread-item] span:has(> svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2, .lucide-circle-alert, .lucide-alert-circle, .lucide-circle-check, .lucide-check-circle)),
+[data-thread-item] button:has(> svg.lucide-alarm-clock) {
+  gap: .25em;
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-legend);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+[data-thread-item] span:has(> svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2, .lucide-circle-alert, .lucide-alert-circle, .lucide-circle-check, .lucide-check-circle)) > svg,
+[data-thread-item] button:has(> svg.lucide-alarm-clock) > svg { width: 1.05em; height: 1.05em; }
+
+/* the two lamps share one pill: 1.52em tall (16px at 10.5px), the same padding */
+[data-thread-item] span:has(> svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2, .lucide-circle-alert, .lucide-alert-circle)) {
+  height: 1.52em;
+  padding: 0 .4em 0 .3em;
+  border-radius: 2px;
+}
+/* needs you (Approval / Input / Request): a lit amber lamp */
+[data-thread-item] span:has(> svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2)) {
+  background-color: var(--ph-amber);
+  color: var(--ph-amber-ink);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .6), inset 0 1px 0 0 rgba(255, 255, 255, .35);
+}
+[data-thread-item] span:has(> svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2)) > svg {
+  color: var(--ph-amber-ink);
+  stroke-width: 2.3;
+}
+/* failed: a red fault lamp, its own form: dark red body, red legend, 1px red rim */
+[data-thread-item] span:has(> svg:is(.lucide-circle-alert, .lucide-alert-circle)) {
+  background-color: var(--ph-red-wash);
+  color: var(--ph-red-text);
+  box-shadow: inset 0 0 0 1px var(--ph-red-edge);
+}
+[data-thread-item] span:has(> svg:is(.lucide-circle-alert, .lucide-alert-circle)) > svg { color: var(--ph-red-text); stroke-width: 2; }
+/* done is a green legend (the success role), woke a bone legend: plain text, no lamp */
+[data-thread-item] button:has(> svg.lucide-alarm-clock) { color: var(--ph-text); }
+
+/* ...and a channel that needs you carries hazard tape on its leading edge, title at full strength */
+[data-thread-item] > [role="button"]:has(svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2))::after {
+  content: "";
+  position: absolute;
+  z-index: 11;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--ph-hazard);
+  pointer-events: none;
+}
+[data-thread-item] > [role="button"]:has(svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2)) span[dir] {
+  color: var(--ph-bright);
+  font-weight: 560;
+}
+
+/* running / setting up: quiet. Sand ink, sentence case, no glow, no lamp; the app's own 70%
+   dim stays. Inks are set one step brighter than a quiet row so that after the dim they
+   still pass AA on the faceplate. */
+[data-thread-item] span:has(> svg:is(.lucide-circle-dashed, .lucide-circle-dot-dashed)) { font-size: var(--ph-t-meta); font-weight: 400; }
+[data-thread-item] span:has(> svg.lucide-circle-dashed) { color: var(--ph-sand); }
+[data-thread-item] span:has(> svg.lucide-circle-dot-dashed) { color: var(--ph-mute); }
+[data-thread-item] > [role="button"]:has(svg.lucide-circle-dashed) { --contrast-secondary-label: #dedccd; --contrast-icon-muted: #cfcdbf; }
+[data-thread-item] > [role="button"]:has(svg.lucide-circle-dashed) span[dir] { color: var(--ph-text); }
+
+/* an unsent draft: no tint at all (a warm wash reads as hover). The row keeps the faceplate
+   and gets a dashed frame, the drafting convention for "not committed yet"; the amber pen
+   stays as its icon. Hover still lights it like any other row. */
+[data-thread-item] > [role="button"]:has(svg:is(.lucide-square-pen, .lucide-pen-box, .lucide-edit)):not([aria-current="page"]) {
+  background-color: transparent;
+  outline: 1px dashed var(--ph-line2);
+  outline-offset: -1px;
+}
+@media (hover: hover) {
+  [data-thread-item] > [role="button"]:has(svg:is(.lucide-square-pen, .lucide-pen-box, .lucide-edit)):not([aria-current="page"]):hover { background-color: var(--sidebar-row-hover); }
+}
+
+/* the open thread: a dark display window cut into the faceplate (the channel on screen).
+   Its LED runs the full height of the well and throws a lime hairline along the floor. */
+[data-thread-item] > [aria-current="page"] {
+  box-shadow: inset 0 2px 4px -1px rgba(0, 0, 0, .9), inset 0 1px 0 0 var(--ph-cut), inset 1px 0 0 0 var(--ph-cut), inset -1px 0 0 0 var(--ph-cut);
+  background-image: linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 60%, transparent), var(--ph-lip) 65%);
+  background-size: 100% 1px;
+  background-position: left bottom;
+  background-repeat: no-repeat;
+}
+[data-thread-item] > [aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  z-index: 12;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--ph-signal);
+  box-shadow: var(--ph-led-glow);
+  pointer-events: none;
+}
+/* the open thread can also need you: the LED steps inside the hazard tape */
+[data-thread-item] > [aria-current="page"]:has(svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2))::before { left: 6px; }
+
+/* monograms: colour-coded keys. Each project keeps its own hue (the app hashes one of 18),
+   folded into a warm, muted set that never meets the lamps or the forbidden blues. The set is
+   scoped to the monogram, so the status remaps above are untouched. */
+[data-slot="project-monogram"] {
+  --color-gray-400: #b9b7ac;
+  --color-rose-400: #e9a0a4;
+  --color-red-400: #ee9a86;
+  --color-orange-400: #eaa877;
+  --color-amber-400: #dcb46e;
+  --color-yellow-400: #d9cb7f;
+  --color-lime-400: #b9c97c;
+  --color-green-400: #93c88f;
+  --color-emerald-400: #8fc4a6;
+  --color-teal-400: #d6c79b;
+  --color-cyan-400: #b5c99a;
+  --color-sky-400: #ddd2b2;
+  --color-blue-400: #c2ad8c;
+  --color-indigo-400: #d79a73;
+  --color-violet-400: #d9a2a2;
+  --color-purple-400: #c7928a;
+  --color-fuchsia-400: #f19a8b;
+  --color-pink-400: #efa6b8;
+}
+[data-slot="project-monogram"] svg {
+  background-color: color-mix(in srgb, currentColor 10%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 46%, transparent);
+  border-radius: 2px;
+}
+
+/* folder mode: project folders are data (own case); the shelves are panel legends */
+[data-slot="sidebar-inner"] li:not([data-thread-item]) > button[data-sidebar-row^="folder:"] {
+  font-family: var(--ph-mono);
+  font-size: .72rem;
+  letter-spacing: .01em;
+  color: var(--ph-text);
+}
+[data-slot="sidebar-inner"] li:not([data-thread-item]) > button[data-sidebar-row^="shelf:"] {
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-legend);
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-shadow: var(--ph-engrave);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* ---------------------------------------------------------------- 5 header */
+/* the faceplate's top rail: its lit lip along the bottom edge, and a calibrated scale on it
+   (minor ticks every 8px, mid every 32, major every 64) that ends in a stop tick clear of the
+   panel latches and the window's caption buttons (the latch cluster is about 5.75rem wide) */
+html[data-theme-id] [data-chat-header] {
+  --ph-ruler: calc(100% - var(--workspace-native-controls-inset, 0px) - 6.5rem);
+  background-color: var(--ph-face);
+  background-image:
+    linear-gradient(var(--ph-lip), var(--ph-lip)),
+    linear-gradient(var(--ph-silk-hi), var(--ph-silk-hi)),
+    repeating-linear-gradient(90deg, var(--ph-silk-hi) 0 1px, transparent 1px 64px),
+    repeating-linear-gradient(90deg, var(--ph-silk) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(90deg, var(--ph-silk-lo) 0 1px, transparent 1px 8px);
+  background-size: 100% 1px, 1px 10px, var(--ph-ruler) 10px, var(--ph-ruler) 7px, var(--ph-ruler) 4px;
+  background-position: left bottom, left calc(var(--ph-ruler) - 1px) bottom 1px, left bottom 1px, left bottom 1px, left bottom 1px;
+  background-repeat: no-repeat;
+}
+
+/* breadcrumb: a readout window set into the rail (the same dark window as the open thread in
+   the sidebar: the channel on screen). It hugs its text and never grows past the nav. The
+   project is data (own case, mono), the title the reading. */
+[data-chat-header] nav ol {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 3px 12px 3px 9px;
+  border-radius: 2px;
+  background-color: var(--ph-screen);
+  box-shadow: inset 0 1px 3px 0 rgba(0, 0, 0, .9), inset 0 0 0 1px var(--ph-cut), 0 1px 0 0 var(--ph-lip);
+}
+[data-chat-header] nav li:not([aria-current]),
+[data-chat-header] nav li:not([aria-current]) button {
+  font-family: var(--ph-mono);
+  font-size: .75rem;
+  letter-spacing: .01em;
+  color: var(--ph-mute);
+}
+[data-chat-header] nav li[aria-hidden="true"] { color: var(--ph-line3); }
+[data-chat-header] nav li[aria-current] { color: var(--ph-bright); font-weight: 560; letter-spacing: -.005em; }
+
+/* panel toggles: hardware latches with an indicator LED when engaged */
+[data-chat-header] [aria-pressed] { position: relative; border-radius: 2px; }
+[data-chat-header] [aria-pressed="true"] {
+  color: var(--ph-bright);
+  --control-icon-color: var(--ph-bright);
+  background-color: var(--ph-face2);
+  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 1px 2px 0 rgba(0, 0, 0, .5);
+}
+[data-chat-header] [aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 10px;
+  height: 2px;
+  margin-left: -5px;
+  background: var(--ph-signal);
+  box-shadow: var(--ph-led-glow);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- 6 conversation */
+/* The display: a near-black carbon screen set into the faceplate and running to the window
+   edge. Its top and left edges meet the faceplate's lip with a void cut and fall away into
+   shade; nothing frames it on the window side. A dot graticule lives in the margins only,
+   cleared from the reading lane (the lane follows the app's own inset variables, so it moves
+   when the details card opens), and two margin stops hang from the top edge at the lane's
+   edges, the way a typewriter shows its margins. Painted under the content. */
+[data-workspace-area="conversation"] {
+  --ph-lane-c: calc(50% + (var(--chat-lane-inset-start, 0px) - var(--chat-lane-inset-end, 0px)) / 2);
+  --ph-lane-hw: calc(min(var(--chat-content-max-width, 46rem), 100% - 6rem - var(--chat-lane-inset-start, 0px) - var(--chat-lane-inset-end, 0px)) / 2);
+  background-color: var(--ph-screen);
+  background-image:
+    conic-gradient(from -30deg at 50% 100%, var(--ph-sand-dim) 0 60deg, transparent 0),
+    conic-gradient(from -30deg at 50% 100%, var(--ph-sand-dim) 0 60deg, transparent 0),
+    linear-gradient(90deg, transparent calc(var(--ph-lane-c) - var(--ph-lane-hw) - 72px), var(--ph-screen) calc(var(--ph-lane-c) - var(--ph-lane-hw) - 32px), var(--ph-screen) calc(var(--ph-lane-c) + var(--ph-lane-hw) + 32px), transparent calc(var(--ph-lane-c) + var(--ph-lane-hw) + 72px)),
+    var(--ph-grid);
+  background-size: 7px 5px, 7px 5px, 100% 100%, 24px 24px;
+  /* a percentage position already centres the image on the point, so the stops need no offset */
+  background-position: calc(var(--ph-lane-c) - var(--ph-lane-hw)) 2px, calc(var(--ph-lane-c) + var(--ph-lane-hw)) 2px, 0 0, var(--ph-lane-c) 12px;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+  box-shadow:
+    inset 0 1px 0 0 var(--ph-cut),
+    inset 0 14px 18px -14px rgba(0, 0, 0, .95),
+    inset 12px 0 16px -12px rgba(0, 0, 0, .8);
+}
+
+/* the operator's slips: what you typed sits on the darkest face tone, a hairline and four dim
+   1px registration marks; no drop shadow, so the screen stays one plane. The marks ride on
+   their own layer (the bubble has no pseudo-elements of its own), above the hairline. */
+[data-user-message-bubble] {
+  border-radius: var(--ph-r-panel);
+  --ph-mark: var(--ph-line3);
+  --ph-mark-len: 7px;
+  --ph-mark-w: 1px;
+  box-shadow: inset 0 0 0 1px var(--ph-line-s);
+}
+[data-user-message-bubble]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* assistant typography: real headings for h1-h3, engraved panel labels below that */
+.chat-markdown strong { font-weight: 640; color: var(--ph-bright); }
+.chat-markdown h1, .chat-markdown h2, .chat-markdown h3 { color: var(--ph-bright); letter-spacing: -.012em; }
+.chat-markdown h1 { font-size: 1.42rem; font-weight: 650; line-height: 1.25; }
+.chat-markdown h2 {
+  font-size: 1.2rem;
+  font-weight: 640;
+  line-height: 1.3;
+  padding-bottom: .3rem;
+  border-bottom: 1px solid var(--ph-line-s);
+}
+.chat-markdown h3 { font-size: 1.04rem; font-weight: 620; line-height: 1.4; }
+/* a machined square bullet in front of h3: the section marker of a panel */
+.chat-markdown h3::before {
+  content: "";
+  display: inline-block;
+  width: .36em;
+  height: .36em;
+  margin-right: .5em;
+  vertical-align: .16em;
+  background: var(--ph-sand-dim);
+}
+.chat-markdown h4, .chat-markdown h5, .chat-markdown h6 {
+  display: flex;
+  align-items: center;
+  gap: .9em;
+  font-family: var(--ph-mono);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ph-mute);
+  line-height: calc(.875rem * 1.3);
+}
+.chat-markdown h4::after, .chat-markdown h5::after, .chat-markdown h6::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--ph-line2), transparent);
+}
+
+/* lists: square markers in graphite, tabular ordinals */
+.chat-markdown ul { list-style-type: square; }
+.chat-markdown li::marker { color: var(--ph-dim); }
+.chat-markdown ol > li::marker { font-family: var(--ph-mono); color: var(--ph-mute); font-variant-numeric: tabular-nums slashed-zero; }
+
+/* inline code: a stamped faceplate tag */
+.chat-markdown :not(pre) > code {
+  font-family: var(--ph-mono);
+  font-size: .86em;
+  color: var(--ph-bright);
+  background: var(--ph-face);
+  border: 1px solid var(--ph-line-f);
+  border-radius: 2px;
+  padding: .06em .38em;
+  font-variant-numeric: slashed-zero;
+}
+[data-user-message-bubble] .chat-markdown :not(pre) > code { background: var(--ph-screen); }
+
+/* code block: a recessed code window under a quiet label strip, both at screen level (the
+   strip one step up), a hairline between them and round them, no drop shadow. The language
+   rides in the strip as a mono capital legend. */
+html[data-theme-id] .chat-markdown .chat-markdown-codeblock {
+  position: relative;
+  background-color: var(--ph-screen2);
+  border: 1px solid var(--ph-line-s);
+  border-radius: var(--ph-r-panel);
+  box-shadow: none;
+}
+.chat-markdown .chat-markdown-codeblock[data-language]:not([data-language=""]) svg:not(.lucide) {
+  opacity: 0;
+}
+.chat-markdown .chat-markdown-codeblock[data-language]:not([data-language=""])::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 9px;
+  left: 11px;
+  height: .9375rem;
+  padding: 0 .3125rem;
+  border-radius: 1px;
+  background-color: var(--ph-void);
+  box-shadow: inset 0 1px 2px 0 rgba(0,0,0,.9),0 1px 0 0 var(--ph-lip);
+  font-family: var(--ph-mono);
+  font-size: .656rem;
+  font-weight: 700;
+  line-height: .9375rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ph-mute);
+  pointer-events: none;
+}
+html[data-theme-id].dark .chat-markdown .chat-markdown-codeblock pre {
+  background-color: var(--ph-void) !important;
+  box-shadow: inset 0 1px 0 0 var(--ph-line-s), inset 0 6px 8px -6px rgba(0, 0, 0, .9);
+  color: var(--ph-text) !important;
+  font-variant-ligatures: none;
+  font-variant-numeric: slashed-zero;
+}
+.chat-markdown-codeblock svg:not(.lucide) { color: var(--ph-sand) !important; }
+/* comments in true italics (Adwaita Mono ships one), so they separate by form as well as ink */
+.dark .chat-markdown-codeblock span:is([style*="737373" i], [style*="115, 115, 115)"]) { font-style: italic; }
+/* keywords carry weight as a second axis, so they never blur into the types beside them
+   (Adwaita Mono's bold keeps the cell width) */
+.dark .chat-markdown-codeblock span:is([style*="#ff678d" i], [style*="255, 103, 141)"]) { font-weight: 600; }
+.chat-markdown-codeblock [aria-pressed="true"] {
+  background-color: var(--ph-face);
+  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 -2px 0 0 var(--ph-signal);
+}
+
+/* tables: instrument readouts */
+.chat-markdown table { font-variant-numeric: tabular-nums slashed-zero; }
+.chat-markdown thead th {
+  font-family: var(--ph-mono);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ph-mute);
+  line-height: calc(.875rem * 1.625);
+  border-bottom: 1px solid var(--ph-line2);
+}
+.chat-markdown tbody td { border-bottom: 1px dotted var(--ph-line-s); }
+
+/* blockquote: a margin note */
+.chat-markdown blockquote { border-inline-start: 2px solid var(--ph-line3); color: var(--ph-mute); }
+
+/* links: sand text on a sand rule; the rule lights up only under the pointer */
+.chat-markdown a {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ph-sand) 45%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: .22em;
+}
+.chat-markdown a:hover { text-decoration-color: var(--ph-signal); }
+/* file chips: paths in the instrument face */
+.chat-markdown a [data-slot="context-chip-label"] { font-family: var(--ph-mono); font-size: .92em; }
+.chat-markdown a:has([data-slot="context-chip-label"]) { text-decoration: none; }
+.chat-markdown a svg:not(.lucide) { color: var(--ph-sand) !important; }
+
+.chat-markdown hr { border: 0; border-top: 1px dotted var(--ph-line3); }
+
+/* changed-files card: the same build as a code block, a quiet label strip over a window at
+   screen level. "CHANGED FILES" is a system legend, so it is set in mono capitals. */
+[data-message-role="assistant"] [data-changed-files-state] {
+  border-radius: var(--ph-r-panel);
+  background-color: var(--ph-screen);
+  box-shadow: inset 0 0 0 1px var(--ph-line-s);
+}
+[data-message-role="assistant"] [data-changed-files-header] {
+  border-radius: var(--ph-r-panel) var(--ph-r-panel) 0 0;
+  background: var(--ph-screen2);
+  box-shadow: inset 0 0 0 1px var(--ph-line-s);
+  font-family: var(--ph-mono);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+[data-message-role="assistant"] [data-changed-files-header] button { text-transform: uppercase; }
+
+/* progress rows: tabular mono readouts on dotted leaders */
+[data-timeline-row-kind="turn-fold"] > div,
+[data-timeline-row-kind="working"] > div { border-bottom-style: dotted; border-color: var(--ph-line-s); }
+[data-timeline-row-kind="turn-fold"] button,
+[data-timeline-row-kind="working"] div:has(> span) {
+  font-family: var(--ph-mono);
+  font-size: .78rem;
+  letter-spacing: .02em;
+  line-height: calc(.875rem * 1.625);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+[data-timeline-row-kind="working"] div:has(> span) { color: var(--ph-text); }
+/* the running state: a steady sand LED (no glow; the counting timer already says the agent is
+   alive). It breathes only where the app's panel animations are switched on (see 14). */
+[data-timeline-row-kind="working"] div:has(> span)::before {
+  content: "";
+  flex: none;
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  background: var(--ph-sand);
+}
+[data-timeline-row-kind="work-live"] button {
+  font-family: var(--ph-mono);
+  font-size: .8rem;
+  letter-spacing: .01em;
+  line-height: calc(.875rem * 1.625);
+}
+
+/* ---------------------------------------------------------------- 7 composer */
+/* the input deck: the floating glass becomes a solid carbon plate (no blur) with a milled
+   edge: a lit top lip inside, a void cut outside, a soft fall-off below */
+[data-slot="composer-shell"] {
+  --chat-composer-outline: var(--ph-line2);
+  --chat-composer-highlight: var(--ph-lip);
+  --chat-composer-glass-surface: var(--ph-face);
+}
+[data-slot="composer-shell"]::before {
+  background-color: var(--ph-face);
+  backdrop-filter: none;
+  border-radius: var(--ph-r-panel);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px rgba(0, 0, 0, .95);
+}
+[data-slot="composer-host"] { border-radius: var(--ph-r-panel); }
+[data-slot="composer-host"]::before { backdrop-filter: none; border-radius: var(--ph-r-panel); background-color: var(--ph-face); }
+/* viewfinder brackets on the outline: bold at rest, lit when the deck is armed (focused) */
+[data-slot="composer-host"]::after {
+  border-radius: var(--ph-r-panel);
+  --ph-mark: var(--ph-mute);
+  --ph-mark-len: 14px;
+  --ph-mark-w: 2px;
+  background-color: transparent;
+  background-origin: border-box;
+  background-clip: border-box;
+  transition: --ph-mark .2s ease;
+}
+[data-slot="composer-host"]:focus-within::after { --ph-mark: var(--ph-signal); }
+
+/* model + effort: a readout in its own case, no tracking, so it never crowds the key */
+[data-chat-composer-form] [data-chat-provider-model-picker] {
+  font-family: var(--ph-mono);
+  font-size: .78rem;
+  letter-spacing: 0;
+  border-radius: 2px;
+}
+
+/* the primary key: square, lit from within (no halo), with key travel: on press it drops 1px
+   and its lit top edge turns into a shadow. It does not grow under the pointer. */
+[data-chat-composer-form] button[type="submit"] {
+  border-radius: 3px;
+  scale: none;
+  transition: transform 80ms ease-out;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, .45), inset 0 -2px 0 0 rgba(0, 0, 0, .22), 0 1px 0 0 rgba(0, 0, 0, .6);
+}
+[data-chat-composer-form] button[type="submit"]:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 0 0 rgba(0, 0, 0, .3), inset 0 -1px 0 0 rgba(255, 255, 255, .2);
+}
+
+/* ---------------------------------------------------------------- 8 overlays */
+/* menus (every level: submenus are role=menu too), popovers, select lists: opaque carbon
+   modules lifted off the faceplate by a firmer edge, a 1px lit top lip, a void cut and a
+   crisp shadow; corner marks */
+:is([data-slot="menu-popup"], [role="menu"]),
+[data-slot="popover-popup"],
+[data-slot="select-popup"] > div {
+  background-color: var(--ph-face2);
+  --ph-mark-len: 7px;
+  backdrop-filter: none;
+  border: 1px solid color-mix(in srgb, var(--ph-line3) 75%, var(--ph-line2));
+  border-radius: var(--ph-r-panel);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px rgba(0, 0, 0, .9);
+}
+[data-slot="popover-popup"]::before { box-shadow: none; }
+
+[role="menu"] :is([role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"]) { border-radius: 1px; }
+/* the row under the cursor or the keyboard carries a lit index tick: every item type
+   (menuitem, menuitemradio, menuitemcheckbox, option, combobox rows) */
+:is([role="menu"], [role="listbox"], [data-slot="popover-popup"]) [data-highlighted],
+[role="menu"] [data-popup-open] {
+  background-color: var(--ph-face3);
+  box-shadow: inset 2px 0 0 0 var(--ph-signal);
+}
+:is([role="menu"], [role="listbox"], [data-slot="popover-popup"]) [data-highlighted]:not([data-variant="destructive"]) { color: var(--ph-bright); }
+/* a checked or selected row is not lit: only the keyboard highlight fills a row. Its check
+   becomes a lime indicator instead, so "on" and "here" never point at different rows. */
+:is([role="menu"], [role="listbox"]) :is([data-checked], [data-selected]):not([data-highlighted]) { background-color: transparent; }
+:is([role="menu"], [role="listbox"], [data-slot="popover-popup"]) :is([aria-checked="true"], [aria-selected="true"]) svg.lucide-check { color: var(--ph-signal); stroke-width: 2.2; }
+[role="menu"] [data-slot="menu-label"] {
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-legend);
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-shadow: var(--ph-engrave);
+  color: var(--ph-mute);
+}
+[role="menu"] [role="separator"] {
+  background: repeating-linear-gradient(90deg, var(--ph-line2) 0 1px, transparent 1px 3px);
+}
+/* shortcuts: keycaps (a hairline rim, a lit top, a dark skirt), quiet legends inside menus */
+kbd {
+  font-family: var(--ph-mono);
+  letter-spacing: .02em;
+  color: var(--ph-text);
+  font-variant-numeric: slashed-zero;
+  border-radius: 2px;
+  background-color: var(--ph-face3);
+  box-shadow: inset 0 0 0 1px var(--ph-line2), inset 0 -2px 0 0 rgba(0, 0, 0, .5), inset 0 2px 0 0 var(--ph-lip);
+}
+[role="menu"] kbd { color: var(--ph-mute); background: none; box-shadow: none; }
+
+/* tooltips: label-maker tape, compact (mono without tracking, so long shortcuts still fit) */
+[data-slot="tooltip-popup"] {
+  background-color: var(--ph-text);
+  color: var(--ph-void);
+  border: 0;
+  border-radius: 1px;
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-meta);
+  letter-spacing: 0;
+  box-shadow: 0 0 0 1px var(--ph-cut), 0 8px 20px -8px rgba(0, 0, 0, .9);
+}
+[data-slot="tooltip-popup"]::before { content: none; }
+
+/* ---------------------------------------------------------------- 9 dialog */
+:is([data-slot="dialog-backdrop"],[data-slot="alert-dialog-backdrop"]) {
+  background-color: color-mix(in srgb,var(--ph-void) 72%,transparent);
+  backdrop-filter: none;
+}
+:is([data-slot="dialog-popup"],[data-slot="alert-dialog-popup"]):not([data-app-modal]) {
+  background-color: var(--ph-face);
+  --ph-mark: var(--ph-mute);
+  --ph-mark-len: 14px;
+  --ph-mark-w: 2px;
+  backdrop-filter: none;
+  border: 1px solid var(--ph-line2);
+  border-radius: var(--ph-r-panel);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip),0 0 0 1px var(--ph-cut),0 30px 70px -24px rgba(0,0,0,.95);
+}
+/* field labels in sentence case (not capitals) */
+[data-slot="dialog-popup"] label:not(:has([role="switch"])) { color: var(--ph-mute); font-weight: 550; }
+
+/* ---------------------------------------------------------------- 10 settings */
+[data-slot="dialog-popup"][data-app-modal] {
+  background-color: var(--ph-screen);
+  border: 1px solid var(--ph-line2);
+  border-radius: var(--ph-r-panel);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 30px 80px -20px rgba(0, 0, 0, .95);
+}
+[data-slot="settings-group"] { border-radius: var(--ph-r-panel); }
+/* section headings are engraved panel legends */
+[data-settings-page-scroll] h2,
+[data-settings-page-scroll] h3:not([data-slot="settings-row"] h3),
+[data-workspace-area="settings-nav"] h3 {
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-legend);
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-shadow: var(--ph-engrave);
+  color: var(--ph-mute);
+}
+/* settings nav: the active page is a lit channel, like the open thread */
+[data-workspace-area="settings-nav"] [aria-current="page"] {
+  position: relative;
+  box-shadow: inset 0 0 0 1px var(--ph-line-f);
+}
+[data-workspace-area="settings-nav"] [aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--ph-signal);
+  box-shadow: var(--ph-led-glow);
+}
+[data-settings-page-scroll] output {
+  font-family: var(--ph-mono);
+  background-color: var(--ph-void);
+  box-shadow: inset 0 0 0 1px var(--ph-line-s);
+  border-radius: 1px;
+  color: var(--ph-bright);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+/* colour-scheme previews: the stock indigo send dots become this theme's key, the stock
+   emerald becomes its green. The other themes' swatches keep their true colours. */
+[data-settings-page-scroll] [role="group"] > button span:is([style*="4f46e5" i], [style*="79, 70, 229"], [style*="8b9cff" i], [style*="139, 156, 255"]) { background-color: var(--ph-signal) !important; }
+[data-settings-page-scroll] [role="group"] > button span:is([style*="34d399" i], [style*="52, 211, 153"]) { background-color: var(--ph-green) !important; }
+[data-settings-page-scroll] [role="group"] > button[aria-pressed],
+[data-settings-page-scroll] [data-theme-library-card] { border-radius: var(--ph-r-panel); }
+/* faders: graphite track, bone level, a squared cap with a lit index line */
+[data-settings-page-scroll] input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 0;
+  background: linear-gradient(to right, var(--ph-text) 0 var(--settings-slider-fill-position, 50%), var(--ph-line-f) var(--settings-slider-fill-position, 50%) 100%);
+  box-shadow: none;
+}
+[data-settings-page-scroll] input[type="range"]::-webkit-slider-thumb {
+  width: 10px;
+  height: 18px;
+  margin-top: -7px;
+  border-radius: 1px;
+  border: 1px solid var(--ph-line3);
+  background: linear-gradient(90deg, transparent 3px, var(--ph-signal) 3px 5px, transparent 5px), var(--ph-face2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .7);
+}
+
+/* ---------------------------------------------------------------- 11 terminal + details */
+/* the terminal is a second window in the same plate: a void cut above it, its lit lip below */
+[data-thread-terminal-drawer] { border-top-color: var(--ph-cut); box-shadow: inset 0 1px 0 0 var(--ph-lip); }
+/* the details card is a carbon module lifted off the screen (the attribute sits on the glass
+   card itself) */
+[data-thread-details-card] {
+  background-color: var(--ph-face2);
+  --ph-mark-len: 7px;
+  backdrop-filter: none;
+  border: 1px solid color-mix(in srgb, var(--ph-line3) 75%, var(--ph-line2));
+  border-radius: var(--ph-r-panel);
+  box-shadow: inset 0 1px 0 0 var(--ph-lip), 0 0 0 1px var(--ph-cut), 0 22px 44px -18px rgba(0, 0, 0, .9);
+}
+[data-thread-details-card] h3 {
+  font-family: var(--ph-mono);
+  font-size: var(--ph-t-legend);
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-shadow: var(--ph-engrave);
+}
+/* meter readings (the value after each meter) in the instrument face */
+[data-thread-details-card] span:has(> span[style*="width"]) ~ span { font-family: var(--ph-mono); font-variant-numeric: slashed-zero; }
+/* meters become segmented bar graphs */
+[data-thread-details-card] span:has(> span[style*="width"]) {
+  height: 6px;
+  border-radius: 0;
+  background: var(--ph-line-f);
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 3px, transparent 3px 4px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 3px, transparent 3px 4px);
+}
+[data-thread-details-card] span:has(> span[style*="width"]) > span { border-radius: 0; background: var(--ph-text); }
+
+/* ---------------------------------------------------------------- 12 primitives */
+/* every button is a squared key (the stock "glass" pill included) */
+[data-slot="button"] { border-radius: var(--control-radius); }
+/* key travel: a pressed key drops 1px instead of shrinking (80ms, transform only) */
+[data-slot="button"]:not([aria-haspopup]):not(:disabled) { transition: box-shadow .15s, transform 80ms ease-out; }
+[data-slot="button"]:active:not([aria-haspopup]):not(:disabled) { scale: none; transform: translateY(1px); }
+
+/* input wells: recessed below the panel, hairline-framed, armed in signal on focus */
+[data-slot="input-control"],
+[data-slot="textarea-control"],
+[data-slot="select-trigger"] {
+  border-radius: 2px;
+  background-color: var(--ph-void);
+  box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, .9), 0 1px 0 0 var(--ph-lip);
+}
+[data-slot="sidebar-inner"] [data-slot="input-control"],
+[data-workspace-area="settings-nav"] [data-slot="input-control"],
+[data-slot="popover-popup"] [data-slot="input-control"] { background-color: transparent; box-shadow: none; }
+[data-slot="input-control"]:focus-within,
+[data-slot="textarea-control"]:focus-within {
+  border-color: var(--ph-signal);
+  box-shadow: inset 0 2px 4px -2px rgba(0, 0, 0, .9);
+}
+
+/* disabled inputs join the one disabled rule: a hatched plate, never a faded field */
+:is([data-slot="input-control"],[data-slot="textarea-control"]):has(> :disabled) {
+  opacity: 1;
+  color: var(--ph-mute);
+  background-image: var(--ph-hatch);
+}
+
+/* switches: square toggles; the thumb is the only span inside. No halo: the lit track is
+   the indicator. */
+[data-slot="switch"] { border-radius: 2px; }
+[data-slot="switch"] span { border-radius: 1px; }
+[data-slot="switch"][data-unchecked] { background-color: var(--ph-void); box-shadow: inset 0 0 0 1px var(--ph-line2); }
+[data-slot="switch"][data-unchecked] span { background-color: var(--ph-dim); }
+[data-slot="switch"][data-checked] { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); }
+[data-slot="switch"][data-checked] span { background-color: var(--ph-signal-ink); }
+
+[role="checkbox"],
+[role="checkbox"] span { border-radius: 1px; }
+
+/* badges are system legends */
+[data-slot="badge"] {
+  font-family: var(--ph-mono);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-radius: 1px;
+}
+
+[role="alert"] { border-radius: var(--ph-r-panel); }
+/* caution alerts carry the hazard tape along their leading edge */
+[role="alert"][data-variant="warning"] {
+  background-image: var(--ph-hazard);
+  background-size: 4px 100%;
+  background-repeat: no-repeat;
+}
+
+[data-slot="scroll-area-thumb"] { border-radius: 0; background-color: var(--ph-line3); }
+
+/* engaged toggles carry the LED underline (their radius already follows --control-radius) */
+[data-slot="toggle"][aria-pressed="true"] { box-shadow: inset 0 -2px 0 0 var(--ph-signal); }
+
+/* The one rule for primary actions: a lit chartreuse key with carbon ink (the messageAction
+   role, so every primary the app draws gets it without a selector).
+   The one rule for disabled: LOCKOUT. A neutral plate with a fine 45-degree hatch, muted ink
+   (7.3:1), a hairline rim. It applies to every disabled button and key, the send key, every
+   disabled switch, checkbox and radio, and every disabled switch row. Never a dimmed lime. */
+[data-slot="button"]:is(:disabled, [aria-disabled="true"]),
+[data-chat-composer-form] button[type="submit"]:disabled,
+[data-slot="switch"][data-disabled],
+:is([role="checkbox"], [role="radio"])[aria-disabled="true"],
+label:has(> [role="switch"][aria-disabled="true"]) {
+  opacity: 1;
+  color: var(--ph-mute);
+  --control-icon-color: var(--ph-mute);
+  background-color: var(--ph-face2);
+  background-image: var(--ph-hatch);
+}
+/* the rim: the element's own 1px border where it has one, an inset hairline where it has none */
+[data-slot="button"]:is(:disabled, [aria-disabled="true"]),
+:is([role="checkbox"], [role="radio"])[aria-disabled="true"],
+label:has(> [role="switch"][aria-disabled="true"]) { border-color: var(--ph-line2); box-shadow: none; }
+[data-chat-composer-form] button[type="submit"]:disabled,
+[data-slot="switch"][data-disabled] { box-shadow: inset 0 0 0 1px var(--ph-line2); }
+[data-slot="button"]:is(:disabled, [aria-disabled="true"])::before { box-shadow: none; }
+[data-slot="switch"][data-disabled] span { background-color: var(--ph-line3); }
+/* a disabled checked box keeps its tick, in muted ink on the plate (no lime fill) */
+:is([role="checkbox"], [role="radio"])[aria-disabled="true"] span { background-color: transparent; color: var(--ph-mute); }
+
+/* ---------------------------------------------------------------- 13 empty state */
+/* A calibration dial centred on the reading lane behind the new-thread hero: a degree scale
+   (a tick every 5 degrees, a brighter long one every 30), a dotted inner ring, three short
+   cross-hair arms and, above the 12 o'clock tick, a lime index pointer on the hero's axis.
+   Its size follows the lane, in two steps by window height: the scale either clears the deck
+   by ~24px all round or passes well behind it, never grazing its corners, and the index stays
+   below the header. The deck and its context strip are opaque, so no ring ever runs through
+   the controls. */
+[data-workspace-area="conversation"] [data-timeline-loading] {
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cdefs%3E%3ClinearGradient id='v' x1='0' y1='0' x2='0' y2='1' gradientUnits='objectBoundingBox'%3E%3Cstop offset='.31' stop-color='%23fff'/%3E%3Cstop offset='.38' stop-color='%23fff' stop-opacity='0'/%3E%3C/linearGradient%3E%3Cmask id='m'%3E%3Crect width='800' height='800' fill='url(%23v)'/%3E%3C/mask%3E%3C/defs%3E%3Cg fill='none' mask='url(%23m)'%3E%3Cpath d='M51.78 325.98A356 356 0 0 1 748.22 325.98' stroke='%23e7e4d6' stroke-opacity='.11'/%3E%3Cpath d='M70.99 327.06L64.15 325.54M74.48 312.78L67.72 310.97M78.6 298.66L71.92 296.56' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M88.96 286.79L76.75 282.35' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M88.65 271.04L82.19 268.36M94.57 257.58L88.23 254.62M101.08 244.39L94.87 241.16' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M124.6 241L98.62 226' stroke='%23c9fd36' stroke-opacity='0.35' stroke-width='1.6'/%3E%3Cpath d='M115.78 218.93L109.87 215.17' stroke='%23c9fd36' stroke-opacity='0.12'/%3E%3Cpath d='M123.95 206.7L118.21 202.69' stroke='%23c9fd36' stroke-opacity='0.14'/%3E%3Cpath d='M132.64 194.85L127.09 190.59' stroke='%23c9fd36' stroke-opacity='0.16'/%3E%3Cpath d='M146.44 187.24L136.48 178.88' stroke='%23c9fd36' stroke-opacity='0.24'/%3E%3Cpath d='M151.54 172.33L146.38 167.6' stroke='%23c9fd36' stroke-opacity='0.2'/%3E%3Cpath d='M161.71 161.71L156.76 156.76' stroke='%23c9fd36' stroke-opacity='0.22'/%3E%3Cpath d='M172.33 151.54L167.6 146.38' stroke='%23c9fd36' stroke-opacity='0.24'/%3E%3Cpath d='M187.24 146.44L178.88 136.48' stroke='%23c9fd36' stroke-opacity='0.33'/%3E%3Cpath d='M194.85 132.64L190.59 127.09' stroke='%23c9fd36' stroke-opacity='0.28'/%3E%3Cpath d='M206.7 123.95L202.69 118.21' stroke='%23c9fd36' stroke-opacity='0.3'/%3E%3Cpath d='M218.93 115.78L215.17 109.87' stroke='%23c9fd36' stroke-opacity='0.32'/%3E%3Cpath d='M241 124.6L226 98.62' stroke='%23c9fd36' stroke-opacity='0.6' stroke-width='1.6'/%3E%3Cpath d='M244.39 101.08L241.16 94.87' stroke='%23c9fd36' stroke-opacity='0.36'/%3E%3Cpath d='M257.58 94.57L254.62 88.23' stroke='%23c9fd36' stroke-opacity='0.38'/%3E%3Cpath d='M271.04 88.65L268.36 82.19' stroke='%23c9fd36' stroke-opacity='0.4'/%3E%3Cpath d='M286.79 88.96L282.35 76.75' stroke='%23c9fd36' stroke-opacity='0.49'/%3E%3Cpath d='M298.66 78.6L296.56 71.92' stroke='%23c9fd36' stroke-opacity='0.44'/%3E%3Cpath d='M312.78 74.48L310.97 67.72' stroke='%23c9fd36' stroke-opacity='0.46'/%3E%3Cpath d='M327.06 70.99L325.54 64.15' stroke='%23c9fd36' stroke-opacity='0.48'/%3E%3Cpath d='M342.52 74.03L340.27 61.23' stroke='%23c9fd36' stroke-opacity='0.58'/%3E%3Cpath d='M356.01 65.88L355.1 58.94' stroke='%23c9fd36' stroke-opacity='0.52'/%3E%3Cpath d='M370.63 64.28L370.02 57.31' stroke='%23c9fd36' stroke-opacity='0.54'/%3E%3Cpath d='M385.3 63.32L384.99 56.33' stroke='%23c9fd36' stroke-opacity='0.56'/%3E%3Cpath d='M414.7 63.32L415.01 56.33M429.37 64.28L429.98 57.31M443.99 65.88L444.9 58.94' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M457.48 74.03L459.73 61.23' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M472.94 70.99L474.46 64.15M487.22 74.48L489.03 67.72M501.34 78.6L503.44 71.92' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M513.21 88.96L517.65 76.75' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M528.96 88.65L531.64 82.19M542.42 94.57L545.38 88.23M555.61 101.08L558.84 94.87' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M559 124.6L574 98.62' stroke='%23e7e4d6' stroke-opacity='0.62' stroke-width='1.6'/%3E%3Cpath d='M581.07 115.78L584.83 109.87M593.3 123.95L597.31 118.21M605.15 132.64L609.41 127.09' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M612.76 146.44L621.12 136.48' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M627.67 151.54L632.4 146.38M638.29 161.71L643.24 156.76M648.46 172.33L653.62 167.6' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M653.56 187.24L663.52 178.88' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M667.36 194.85L672.91 190.59M676.05 206.7L681.79 202.69M684.22 218.93L690.13 215.17' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M675.4 241L701.38 226' stroke='%23e7e4d6' stroke-opacity='0.62' stroke-width='1.6'/%3E%3Cpath d='M698.92 244.39L705.13 241.16M705.43 257.58L711.77 254.62M711.35 271.04L717.81 268.36' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cpath d='M711.04 286.79L723.25 282.35' stroke='%23e7e4d6' stroke-opacity='0.28'/%3E%3Cpath d='M721.4 298.66L728.08 296.56M725.52 312.78L732.28 310.97M729.01 327.06L735.85 325.54' stroke='%23e7e4d6' stroke-opacity='0.15'/%3E%3Cg fill='%23e7e4d6' fill-opacity='.3' font-family='Adwaita Mono,monospace' font-size='9.5' letter-spacing='1' text-anchor='middle' dominant-baseline='central'%3E%3Ctext x='78.7' y='214.5' transform='rotate(-60 78.7 214.5)'%3E300%3C/text%3E%3Ctext x='214.5' y='78.7' transform='rotate(-30 214.5 78.7)'%3E330%3C/text%3E%3Ctext x='585.5' y='78.7' transform='rotate(30 585.5 78.7)'%3E030%3C/text%3E%3Ctext x='721.3' y='214.5' transform='rotate(60 721.3 214.5)'%3E060%3C/text%3E%3C/g%3E%3Cpath d='M393 43H407L400 56Z' fill='%23c9fd36'/%3E%3Cpath d='M400 78L400 56' stroke='%23c9fd36' stroke-opacity='0.9' stroke-width='1.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: min(calc(2 * var(--ph-lane-hw,23rem) + 64px),calc((50vh - 56px) * 2.1)) auto;
+  background-position: calc(50% + (var(--chat-lane-inset-start,0px) - var(--chat-lane-inset-end,0px)) / 2) calc(50% - 1.625rem);
+  background-repeat: no-repeat;
+}
+@media (max-width: 1023px),(max-height: 640px) {
+  [data-workspace-area="conversation"] [data-timeline-loading] {
+    background-image: none;
+  }
+}
+[data-workspace-area="composer"] h1 {
+  font-weight: 330;
+  letter-spacing: -.025em;
+  color: var(--ph-bright);
+}
+[data-workspace-area="composer"] h1 button {
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--ph-signal);
+  text-decoration-thickness: 2px;
+  text-underline-offset: .18em;
+}
+/* the context strip under the deck: mono data, on an opaque screen-coloured band (invisible
+   on the screen, but nothing behind it shows through) */
+[data-slot="composer-context-strip"] {
+  font-family: var(--ph-mono);
+  letter-spacing: .01em;
+  background-color: var(--ph-screen);
+}
+
+/* ---------------------------------------------------------------- 14 motion */
+@property --ph-mark {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #5d5d56;
+}
+/* The working LED is steady by default. It breathes only when the app's panel animations are
+   explicitly on (this user has them off, so it never moves here), never faster than 3.6s,
+   never below 55%, and never under reduced motion. */
+@keyframes ph-led {
+  0%, 55%, 100% { opacity: 1; }
+  78% { opacity: .55; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-panel-animations="true"] [data-timeline-row-kind="working"] div:has(> span)::before { animation: ph-led 3.6s ease-in-out infinite; }
+}
+/* the same setting stills the app's own 2s blink on a running terminal's icon in the sidebar
+   (the icon stays, lit and steady), so with panel animations off nothing on screen moves */
+[data-panel-animations="false"] [data-thread-item] svg.lucide-terminal { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="composer-host"]::after { transition: none; }
+  [data-chat-composer-form] button[type="submit"],
+  [data-slot="button"] { transition: none; }
+}
+
+/* ---------------------------------------------------------------- 15 syntax
+   Code tokens are inline styles from the app's highlighter; only !important reaches them.
+   Eight classes spread by hue AND lightness inside the warm half of the wheel (no blue, violet, cyan or teal):
+   deep coral keywords (also bold, see 6), apricot types, straw functions, leaf strings, pink literals,
+   bone identifiers, italic graphite comments, graphite punctuation. The signal colour stays out of code. */
+/* syntax tokens: generated by tools/syntax-remap.mjs */
+.dark .chat-markdown-codeblock span[style*="#ff678d" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 103, 141)"]{color:#fc6854 !important}
+.dark .chat-markdown-codeblock span[style*="#ff855e" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 133, 94)"]{color:#fc6854 !important}
+.dark .chat-markdown-codeblock span[style*="#d568ea" i],.dark .chat-markdown-codeblock span[style*="rgb(213, 104, 234)"]{color:#f7ab64 !important}
+.dark .chat-markdown-codeblock span[style*="#9d6afb" i],.dark .chat-markdown-codeblock span[style*="rgb(157, 106, 251)"]{color:#f2d973 !important}
+.dark .chat-markdown-codeblock span[style*="#5ecc71" i],.dark .chat-markdown-codeblock span[style*="rgb(94, 204, 113)"]{color:#89d481 !important}
+.dark .chat-markdown-codeblock span[style*="#ffd452" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 212, 82)"]{color:#f3a1c2 !important}
+.dark .chat-markdown-codeblock span[style*="#68cdf2" i],.dark .chat-markdown-codeblock span[style*="rgb(104, 205, 242)"]{color:#f3a1c2 !important}
+.dark .chat-markdown-codeblock span[style*="#61d5c0" i],.dark .chat-markdown-codeblock span[style*="rgb(97, 213, 192)"]{color:#efba64 !important}
+.dark .chat-markdown-codeblock span[style*="#64d1db" i],.dark .chat-markdown-codeblock span[style*="rgb(100, 209, 219)"]{color:#f3909a !important}
+.dark .chat-markdown-codeblock span[style*="#08c0ef" i],.dark .chat-markdown-codeblock span[style*="rgb(8, 192, 239)"]{color:#c0beb0 !important}
+.dark .chat-markdown-codeblock span[style*="#ffa359" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 163, 89)"]{color:#e7e4d6 !important}
+.dark .chat-markdown-codeblock span[style*="#ffab16" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 171, 22)"]{color:#ff9a64 !important}
+.dark .chat-markdown-codeblock span[style*="#a3a3a3" i],.dark .chat-markdown-codeblock span[style*="rgb(163, 163, 163)"]{color:#d7cbb3 !important}
+.dark .chat-markdown-codeblock span[style*="#009fff" i],.dark .chat-markdown-codeblock span[style*="rgb(0, 159, 255)"]{color:#ded5b0 !important}
+.dark .chat-markdown-codeblock span[style*="#60d199" i],.dark .chat-markdown-codeblock span[style*="rgb(96, 209, 153)"]{color:#c6d58a !important}
+.dark .chat-markdown-codeblock span[style*="#69b1ff" i],.dark .chat-markdown-codeblock span[style*="rgb(105, 177, 255)"]{color:#f4b85b !important}
+.dark .chat-markdown-codeblock span[style*="#636363" i],.dark .chat-markdown-codeblock span[style*="rgb(99, 99, 99)"]{color:#8c8b83 !important}
+.dark .chat-markdown-codeblock span[style*="#737373" i],.dark .chat-markdown-codeblock span[style*="rgb(115, 115, 115)"]{color:#828377 !important}
+.dark .chat-markdown-codeblock span[style*="#fafafa" i],.dark .chat-markdown-codeblock span[style*="rgb(250, 250, 250)"]{color:#e7e4d6 !important}
+.dark .chat-markdown-codeblock span[style*="#07c480" i],.dark .chat-markdown-codeblock span[style*="rgb(7, 196, 128)"]{color:#84dd98 !important}
+.dark .chat-markdown-codeblock span[style*="#ff2e3f" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 46, 63)"]{color:#ff9483 !important}
+.dark .chat-markdown-codeblock span[style*="#ffca00" i],.dark .chat-markdown-codeblock span[style*="rgb(255, 202, 0)"]{color:#ffc459 !important}
+
+/* Rich hover cards (thread preview, pull-request list) are tooltips too, but their text is
+   light: they must be dark panels, never label tape. Two hooks on purpose: the app's glass
+   variant class, and the structure (a block element inside the viewport). */
+[data-slot="tooltip-popup"]:is(.dropdown-glass,:has(> [data-slot="tooltip-viewport"] > :is(div,ul,ol,section,article,table))) {
+  background-color: var(--ph-face2);
+  color: var(--ph-text);
+  border: 1px solid var(--ph-line3);
+  border-radius: var(--ph-r-panel);
+  font-family: inherit;
+  font-size: .75rem;
+  letter-spacing: normal;
+  backdrop-filter: none;
+  box-shadow: inset 0 1px 0 0 var(--ph-lip),0 0 0 1px var(--ph-cut),0 16px 40px -16px rgba(0,0,0,.9);
+}
+/* ...and inside plain label-tape tooltips, muted hints (shortcuts) switch to dark ink */
+[data-slot="tooltip-popup"]:not(.dropdown-glass):not(:has(> [data-slot="tooltip-viewport"] > :is(div,ul,ol,section,article,table))) {
+  --contrast-foreground: var(--ph-void);
+  --contrast-muted-foreground: #3b3b34;
+  --contrast-secondary-label: #3b3b34;
+  --contrast-popover-foreground: var(--ph-void);
+}
