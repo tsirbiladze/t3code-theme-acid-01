@@ -374,27 +374,19 @@ html[data-theme-id] [data-slot="sidebar"] [role="navigation"] { border-color: va
 }
 
 /* the open thread: a dark display window cut into the faceplate (the channel on screen).
-   An indicator lamp is set into its leading edge: a short lit bar that stops short of the
-   corners, with its light falling softly onto the glass. No lines around the well: the lamp
-   is the only lime here. */
+   Its LED runs the full height of the well and throws a lime hairline along the floor.
+   Bar, glow and hairline are three background layers of the row itself, all anchored to its
+   bottom edge, so the bar ends exactly on the hairline and follows the well's corners. (As a
+   separate ::before the bar could run a pixel past the hairline in the live app.) */
 [data-thread-item] > [aria-current="page"] {
-  box-shadow: inset 0 2px 4px -1px rgba(0, 0, 0, .9), inset 0 1px 0 0 var(--ph-cut), inset 1px 0 0 0 var(--ph-cut), inset -1px 0 0 0 var(--ph-cut), inset 0 -1px 0 0 var(--ph-lip), inset 20px 0 16px -16px color-mix(in srgb, var(--ph-signal) 30%, transparent);
-}
-[data-thread-item] > [aria-current="page"]::before {
-  content: "";
-  position: absolute;
-  z-index: 12;
-  left: 0;
-  top: 22%;
-  bottom: 22%;
-  width: 3px;
-  background: linear-gradient(180deg, var(--ph-signal-hover), var(--ph-signal) 30%, var(--ph-signal) 70%, var(--ph-signal-deep));
-  border-radius: 0 1.5px 1.5px 0;
-  box-shadow: 0 0 5px 0 color-mix(in srgb, var(--ph-signal) 55%, transparent);
-  pointer-events: none;
+  box-shadow: inset 0 2px 4px -1px rgba(0, 0, 0, .9), inset 0 1px 0 0 var(--ph-cut), inset 1px 0 0 0 var(--ph-cut), inset -1px 0 0 0 var(--ph-cut);
+  background-image: linear-gradient(var(--ph-signal), var(--ph-signal)), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 38%, transparent), transparent), linear-gradient(90deg, color-mix(in srgb, var(--ph-signal) 60%, transparent), var(--ph-lip) 65%);
+  background-size: 2px 100%, 6px 100%, 100% 1px;
+  background-position: left bottom, left bottom, left bottom;
+  background-repeat: no-repeat;
 }
 /* the open thread can also need you: the LED steps inside the hazard tape */
-[data-thread-item] > [aria-current="page"]:has(svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2))::before { left: 6px; }
+[data-thread-item] > [aria-current="page"]:has(svg:is(.lucide-shield-question-mark, .lucide-shield-question, .lucide-message-circle-question-mark, .lucide-message-circle-question, .lucide-user-round, .lucide-user-2)) { background-position: 6px bottom, 6px bottom, left bottom; }
 
 /* monograms: colour-coded keys. Each project keeps its own hue (the app hashes one of 18),
    folded into a warm, muted set that never meets the lamps or the forbidden blues. The set is
@@ -898,12 +890,11 @@ kbd {
   content: "";
   position: absolute;
   left: 0;
-  top: 22%;
-  bottom: 22%;
-  width: 3px;
-  background: linear-gradient(180deg, var(--ph-signal-hover), var(--ph-signal) 30%, var(--ph-signal) 70%, var(--ph-signal-deep));
-  border-radius: 0 1.5px 1.5px 0;
-  box-shadow: 0 0 5px 0 color-mix(in srgb, var(--ph-signal) 55%, transparent);
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--ph-signal);
+  box-shadow: var(--ph-led-glow);
 }
 [data-settings-page-scroll] output {
   font-family: var(--ph-mono);
