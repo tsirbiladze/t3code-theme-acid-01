@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 (2026-11-19)
+
+- Changed: the open thread's highlight. The full-height bar and the lime hairline are replaced by
+  an indicator lamp set into the row's leading edge: a short lit bar that stops short of the
+  corners, with a soft glow on the well. The active page in the settings nav uses the same lamp.
+
 ## 1.0.1 (2026-11-19)
 
 - Fixed: the thread preview card that appears when hovering a sidebar thread was painted as a
