@@ -75,6 +75,11 @@ t3 theme set acid-01
 The file name is the theme's ID (`acid-01-light.json` becomes `acid-01-light`). To go back, pick another theme in
 Settings → Appearance, or run `t3 theme set t3-chat`.
 
+## Gallery edition
+
+The community gallery at [t3themes.com](https://t3themes.com) limits theme CSS to 20,000 characters, so
+[`gallery/`](gallery/) holds a dark-only core edition written to fit. If you install by hand, use the files above.
+
 ## Change it
 
 ```
