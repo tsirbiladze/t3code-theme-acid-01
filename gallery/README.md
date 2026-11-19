@@ -1,14 +1,12 @@
 # ACID-01, gallery edition
 
-[t3themes.com](https://t3themes.com) accepts at most 20,000 characters of theme CSS. The full dark theme uses about
-43,000, so this folder holds a core edition written to fit: 19,480 characters, dark only.
+[t3themes.com](https://t3themes.com) accepts at most 20,000 characters of theme CSS. The full theme uses about
+49,000, so this folder holds a core edition written to fit: 18,985 characters, dark only.
 
 ![An open thread in the gallery edition](chat.png)
 
-It is the same theme to look at, with one exception: the new-thread screen keeps the calibration dial that the
-full theme had up to 1.1.0, where the full theme now shows a plain field of dots. On every other
-screen the core edition matches the full theme's render on more than 99% of pixels. What else it leaves out is
-small: legends have no engraved shadow, some already-warm syntax colors keep the highlighter's own
+It is the same theme to look at. In the views the full theme is checked against, the core edition matches its
+render on more than 99% of pixels. What it leaves out is small: legends have no engraved shadow, some already-warm syntax colors keep the highlighter's own
 values, badges are a size smaller, and there are no transitions.
 
 ```

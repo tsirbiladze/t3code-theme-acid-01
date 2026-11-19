@@ -353,7 +353,7 @@ html[data-theme-id] [data-chat-header] {
    falling from the top and left). A dot graticule fills the margins only, cleared from the
    reading lane (it follows the app's lane variables, so it moves when the details card opens),
    and two margin stops hang from the top edge at the lane's edges, as on a typewriter.
-   --c is the lane's centre, --w its half width (the gauge in 12 uses them too). */
+   --c is the lane's centre, --w its half width (the dot field in 12 uses them too). */
 [data-workspace-area="conversation"] {
   --c: calc(50% + (var(--chat-lane-inset-start, 0px) - var(--chat-lane-inset-end, 0px)) / 2);
   --w: calc(min(var(--chat-content-max-width, 46rem), 100% - 6rem - var(--chat-lane-inset-start, 0px) - var(--chat-lane-inset-end, 0px)) / 2);
@@ -670,30 +670,37 @@ label:has(> [role="switch"][aria-disabled="true"]),
 [data-slot="switch"][data-disabled] span { background-color: var(--ph-line3); }
 
 /* ---------------------------------------------------------------- 12 empty state */
-/* A calibration gauge centred on the reading lane behind the new-thread hero, rebuilt small:
-   the full theme draws one path per tick; here each tick class is one dashed arc whose
-   pathLength is its span in degrees, so a dash unit is one degree (minor tick every 2.5, mid
-   every 10, long every 30, reaching inward). A hairline arc rides outside, a lime level climbs
-   from 300 to 360 (the bone scale skips that wedge: each bone arc is two pieces, -90..-60 and
-   0..90, whose first piece spans a whole period, so the ticks land on the degree marks whether
-   or not the dashing restarts per piece), a lime index stands on the hero's axis, and the
-   30-degree majors carry engraved legends (each one rotated about the dial's centre).
-   The SVG references nothing by url(): T3 Code's text check (the gallery runs it) reads any
-   url() inside a data: address as a file load. So the fade below the arc is a CSS gradient
-   layer in the screen colour, sharing the gauge's position and size; the gauge sits inside the
-   graticule's clear band, so the layer only ever covers plain screen. The gauge sizes with the
-   lane (--c, --w from 6) and hides in small windows, where it would crowd the deck. The
-   shorthand also clears the element's own opaque fill, so the screen's graticule shows. */
+/* The new-thread screen: a sheet of dotted paper, no artwork. With no conversation to keep
+   clear, the margin graticule from 6 steps aside (its margin stops stay) and one even field of
+   1px dots every 20px covers the whole screen: the same weight above and below the deck, fading
+   out in a short band at the window edges, and left out over the lane behind the two lines of
+   small type (the line under the headline and the context strip). The tile is drawn with
+   crispEdges and placed on a whole multiple of 20px, which is a whole number of device pixels
+   at 1, 1.25, 1.3, 1.5 and 2x, so every dot is one solid device pixel. The context strip is
+   transparent here so the field runs on under it. In a very short window the app moves the
+   headline and deck to the bottom edge, away from the clear bands, so the field is left out. */
+[data-workspace-area="conversation"]:has([data-timeline-loading]) { background-size: 7px 5px, 7px 5px, 0 0, 0 0; }
 [data-workspace-area="conversation"] [data-timeline-loading] {
-  background:
-    linear-gradient(#0b0b0900 31%, var(--ph-screen) 38%),
-    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-400 -400 800 800' fill='none'><circle r='356' stroke='%23e7e4d6' stroke-opacity='.11'/><g stroke='%23e7e4d6'><path d='M-340.5 0A340.5 340.5 0 0 1-294.88-170.25M0-340.5A340.5 340.5 0 0 1 340.5 0' pathLength='120' stroke-width='7' stroke-dasharray='.17 2.33' stroke-opacity='.15'/><path d='M-337.5 0A337.5 337.5 0 0 1-292.28-168.75M0-337.5A337.5 337.5 0 0 1 337.5 0' pathLength='120' stroke-width='13' stroke-dasharray='.17 9.83' stroke-opacity='.28'/><path d='M-333 0A333 333 0 0 1-288.39-166.5M0-333A333 333 0 0 1 333 0' pathLength='120' stroke-width='30' stroke-dasharray='.28 29.72' stroke-opacity='.62'/></g><g stroke='%23c9fd36'><path d='M-294.88-170.25A340.5 340.5 0 0 1 0-340.5' pathLength='60' stroke-width='7' stroke-dasharray='.17 2.33' stroke-opacity='.36'/><path d='M-292.28-168.75A337.5 337.5 0 0 1 0-337.5' pathLength='60' stroke-width='13' stroke-dasharray='.17 9.83' stroke-opacity='.45'/><path d='M-288.39-166.5A333 333 0 0 1 0-333' pathLength='60' stroke-width='30' stroke-dasharray='.28 29.72' stroke-opacity='.55'/></g><path d='M-7-357h14l-7 13zM-.75-344h1.5v22h-1.5z' fill='%23c9fd36'/><g fill='%23e7e4d6' fill-opacity='.3' font-family='Adwaita Mono,monospace' font-size='9.5' letter-spacing='1' text-anchor='middle'><text y='-368' transform='rotate(-60)'>300</text><text y='-368' transform='rotate(-30)'>330</text><text y='-368' transform='rotate(30)'>030</text><text y='-368' transform='rotate(60)'>060</text></g></svg>");
-  background-position: var(--c) calc(50% - 1.625rem);
-  background-size: min(2 * var(--w) + 64px, 105vh - 118px);
-  background-repeat: no-repeat;
+  background: none;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .3;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' shape-rendering='crispEdges' fill='%23e7e4d6'><path d='M0 0h1v1H0z'/></svg>") round(calc(var(--c) + 10px), 20px) round(calc(50% - 1.625rem + 10px), 20px) / 20px 20px;
+    mask-image:
+      linear-gradient(90deg, #0000 8px, #000 128px calc(100% - 128px), #0000 calc(100% - 8px)),
+      linear-gradient(#0000 8px, #000 128px calc(100% - 128px), #0000 calc(100% - 8px)),
+      linear-gradient(#000 calc(50% - 8.25rem), #0000 calc(50% - 7.75rem) calc(50% - 6rem), #000 calc(50% - 5.5rem) calc(50% + 1.75rem), #0000 calc(50% + 2.25rem) calc(50% + 3.5rem), #000 calc(50% + 4rem)),
+      linear-gradient(90deg, #000 calc(var(--c) - var(--w) - 2rem), #0000 calc(var(--c) - var(--w)) calc(var(--c) + var(--w)), #000 calc(var(--c) + var(--w) + 2rem));
+    mask-composite: intersect, intersect, add;
+  }
 }
-@media (max-width: 1023px), (max-height: 640px) {
-  [data-workspace-area="conversation"] [data-timeline-loading] { background: none; }
+[data-workspace-area="composer"]:has(h1) [data-slot="composer-context-strip"] { background-color: #0000; }
+@media (max-height: 34rem) {
+  [data-workspace-area="conversation"] [data-timeline-loading]::before { content: none; }
+  [data-workspace-area="composer"]:has(h1) [data-slot="composer-context-strip"] { background-color: var(--ph-screen); }
 }
 [data-workspace-area="composer"] h1 {
   font-weight: 330;

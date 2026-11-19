@@ -8,6 +8,7 @@
   Daylight the dots are ink on paper. The spacing lands on whole device pixels at 100%, 125%,
   130%, 150% and 200%, so every dot is one solid pixel.
 - Removed: `tools/gen-scope.mjs`.
+- The gallery edition gets the same dot field in place of its dial (18,985 characters).
 - Every other screen is unchanged.
 
 ## 1.2.0 (2026-11-19)
